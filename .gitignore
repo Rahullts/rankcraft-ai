@@ -33,3 +33,9 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Scratch scripts & temporary conversion assets
+scratch/
+docs/e-record/friend_pages/
+docs/e-record/friend_reference.pdf
+docs/e-record/rendered_pages/

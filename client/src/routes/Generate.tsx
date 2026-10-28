@@ -689,34 +689,88 @@ export const Generate: React.FC = () => {
           {/* Tab 5: Article */}
           {activeTab === 'article' && (
             <div className="tab-content">
-              <div className="card">
-                <div className="card-header">
-                  <div className="article-meta-header">
-                    <h4 className="card-title">Full SEO-Friendly Article Draft</h4>
-                    <div className="article-stats">
-                      <span className="stat-pill">
-                        <FileText size={14} />
-                        <span>{countWords(currentPkg.articleMarkdown || '')} words</span>
-                      </span>
-                      <span className="stat-pill">
-                        <Clock size={14} />
-                        <span>~{Math.ceil(countWords(currentPkg.articleMarkdown || '') / 200)} min read</span>
-                      </span>
+              <div className="article-preview-layout">
+                {/* Main Article Reading Canvas */}
+                <div className="card article-reader-card">
+                  <div className="card-header article-reader-header">
+                    <div className="article-meta-header">
+                      <h4 className="card-title">Full SEO-Friendly Article Draft</h4>
+                      <div className="article-stats">
+                        <span className="stat-pill">
+                          <FileText size={14} />
+                          <span>{countWords(currentPkg.articleMarkdown || '')} words</span>
+                        </span>
+                        <span className="stat-pill">
+                          <Clock size={14} />
+                          <span>~{Math.ceil(countWords(currentPkg.articleMarkdown || '') / 200)} min read</span>
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => handleCopy('article-markdown', currentPkg.articleMarkdown || '')}
+                    >
+                      {copiedId === 'article-markdown' ? <Check size={14} /> : <Copy size={14} />}
+                      <span>{copiedId === 'article-markdown' ? 'Copied Markdown' : 'Copy Markdown'}</span>
+                    </button>
+                  </div>
+                  <div className="card-body article-reader-body">
+                    <article className="markdown-prose article-prose">
+                      <ReactMarkdown>{currentPkg.articleMarkdown || ''}</ReactMarkdown>
+                    </article>
+                  </div>
+                </div>
+
+                {/* Side / Stacked Article Metadata Panel */}
+                <aside className="article-meta-sidebar">
+                  <div className="card article-meta-card">
+                    <div className="card-header">
+                      <h4 className="card-title text-sm">Article SEO Scope</h4>
+                    </div>
+                    <div className="card-body article-meta-body">
+                      <div className="meta-kpi-item mb-3">
+                        <span className="meta-kpi-label">Primary Target Keyword</span>
+                        <div className="kw-tag kw-primary mt-1">{currentPkg.input.primaryKeyword}</div>
+                      </div>
+
+                      <div className="meta-kpi-row mb-3">
+                        <div className="meta-kpi-item">
+                          <span className="meta-kpi-label">Word Target</span>
+                          <span className="meta-kpi-val">{countWords(currentPkg.articleMarkdown || '')} / {currentPkg.input.wordCount}</span>
+                        </div>
+                        <div className="meta-kpi-item">
+                          <span className="meta-kpi-label">Rubric Score</span>
+                          <span className="meta-kpi-val score-highlight">
+                            {currentPkg.evaluation ? `${currentPkg.evaluation.totalPoints} pts` : 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="meta-kpi-item mb-3">
+                        <span className="meta-kpi-label">SERP Snippet Preview</span>
+                        <div className="mini-serp-box mt-1">
+                          <div className="mini-serp-url">https://example.com/blog/{currentPkg.input.primaryKeyword.toLowerCase().replace(/\s+/g, '-')}</div>
+                          <div className="mini-serp-title">{currentPkg.strategy?.titles[0]?.text || currentPkg.input.topic}</div>
+                          <div className="mini-serp-meta">{currentPkg.strategy?.metaDescription || 'No description generated.'}</div>
+                        </div>
+                      </div>
+
+                      {currentPkg.outline?.sections && (
+                        <div className="meta-kpi-item">
+                          <span className="meta-kpi-label">Outline Structure ({currentPkg.outline.sections.length} Sections)</span>
+                          <ul className="mini-outline-list mt-1">
+                            {currentPkg.outline.sections.map((sec, idx) => (
+                              <li key={idx} className="mini-outline-item">
+                                <span className="mini-h2-dot">•</span>
+                                <span>{sec.h2}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleCopy('article-markdown', currentPkg.articleMarkdown || '')}
-                  >
-                    {copiedId === 'article-markdown' ? <Check size={14} /> : <Copy size={14} />}
-                    <span>{copiedId === 'article-markdown' ? 'Copied Markdown' : 'Copy Markdown'}</span>
-                  </button>
-                </div>
-                <div className="card-body">
-                  <article className="markdown-prose">
-                    <ReactMarkdown>{currentPkg.articleMarkdown || ''}</ReactMarkdown>
-                  </article>
-                </div>
+                </aside>
               </div>
             </div>
           )}

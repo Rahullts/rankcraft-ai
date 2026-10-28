@@ -1,119 +1,180 @@
 {
-  "timestamp": "2026-10-28T13:30:30.350Z",
-  "routes": {
-    "01-dashboard": {
-      "label": "Dashboard",
-      "url": "http://localhost:5173/",
-      "title": "AI SEO Content Assistant Using Prompt Engineering",
-      "heading": "AI SEO",
-      "desktopOverflow": {
-        "scrollWidth": 1280,
-        "clientWidth": 1280,
-        "hasOverflow": false
-      },
-      "mobileOverflow": {
-        "scrollWidth": 375,
-        "clientWidth": 375,
-        "hasOverflow": false
+  "timestamp": "2026-10-28T16:56:34.309Z",
+  "viewports": {
+    "1366x768": {
+      "label": "Standard Laptop",
+      "width": 1366,
+      "height": 768,
+      "routes": {
+        "dashboard": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "hasOverflow": false
+        },
+        "generate": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "hasOverflow": false
+        },
+        "lab": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "hasOverflow": false
+        },
+        "evaluation": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "hasOverflow": false
+        },
+        "prompts": {
+          "scrollWidth": 1366,
+          "clientWidth": 1366,
+          "hasOverflow": false
+        }
       }
     },
-    "02-generate": {
-      "label": "Generate Package",
-      "url": "http://localhost:5173/generate",
-      "title": "AI SEO Content Assistant Using Prompt Engineering",
-      "heading": "AI SEO",
-      "desktopOverflow": {
-        "scrollWidth": 1280,
-        "clientWidth": 1280,
-        "hasOverflow": false
-      },
-      "mobileOverflow": {
-        "scrollWidth": 375,
-        "clientWidth": 375,
-        "hasOverflow": false
+    "1440x900": {
+      "label": "Widescreen Laptop",
+      "width": 1440,
+      "height": 900,
+      "routes": {
+        "dashboard": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440,
+          "hasOverflow": false
+        },
+        "generate": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440,
+          "hasOverflow": false
+        },
+        "lab": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440,
+          "hasOverflow": false
+        },
+        "evaluation": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440,
+          "hasOverflow": false
+        },
+        "prompts": {
+          "scrollWidth": 1440,
+          "clientWidth": 1440,
+          "hasOverflow": false
+        }
       }
     },
-    "03-lab": {
-      "label": "Prompt Engineering Lab",
-      "url": "http://localhost:5173/lab",
-      "title": "AI SEO Content Assistant Using Prompt Engineering",
-      "heading": "AI SEO",
-      "desktopOverflow": {
-        "scrollWidth": 1280,
-        "clientWidth": 1280,
-        "hasOverflow": false
-      },
-      "mobileOverflow": {
-        "scrollWidth": 375,
-        "clientWidth": 375,
-        "hasOverflow": false
+    "1280x800": {
+      "label": "Smaller Laptop",
+      "width": 1280,
+      "height": 800,
+      "routes": {
+        "dashboard": {
+          "scrollWidth": 1280,
+          "clientWidth": 1280,
+          "hasOverflow": false
+        },
+        "generate": {
+          "scrollWidth": 1280,
+          "clientWidth": 1280,
+          "hasOverflow": false
+        },
+        "lab": {
+          "scrollWidth": 1280,
+          "clientWidth": 1280,
+          "hasOverflow": false
+        },
+        "evaluation": {
+          "scrollWidth": 1280,
+          "clientWidth": 1280,
+          "hasOverflow": false
+        },
+        "prompts": {
+          "scrollWidth": 1280,
+          "clientWidth": 1280,
+          "hasOverflow": false
+        }
       }
     },
-    "04-evaluation": {
-      "label": "Evaluation & Rubric",
-      "url": "http://localhost:5173/evaluation",
-      "title": "AI SEO Content Assistant Using Prompt Engineering",
-      "heading": "AI SEO",
-      "desktopOverflow": {
-        "scrollWidth": 1280,
-        "clientWidth": 1280,
-        "hasOverflow": false
-      },
-      "mobileOverflow": {
-        "scrollWidth": 375,
-        "clientWidth": 375,
-        "hasOverflow": false
+    "1024x768": {
+      "label": "Tablet / Narrow Desktop",
+      "width": 1024,
+      "height": 768,
+      "routes": {
+        "dashboard": {
+          "scrollWidth": 1024,
+          "clientWidth": 1024,
+          "hasOverflow": false
+        },
+        "generate": {
+          "scrollWidth": 1024,
+          "clientWidth": 1024,
+          "hasOverflow": false
+        },
+        "lab": {
+          "scrollWidth": 1024,
+          "clientWidth": 1024,
+          "hasOverflow": false
+        },
+        "evaluation": {
+          "scrollWidth": 1024,
+          "clientWidth": 1024,
+          "hasOverflow": false
+        },
+        "prompts": {
+          "scrollWidth": 1024,
+          "clientWidth": 1024,
+          "hasOverflow": false
+        }
       }
     },
-    "05-prompts": {
-      "label": "Prompts & Guide",
-      "url": "http://localhost:5173/prompts",
-      "title": "AI SEO Content Assistant Using Prompt Engineering",
-      "heading": "AI SEO",
-      "desktopOverflow": {
-        "scrollWidth": 1280,
-        "clientWidth": 1280,
-        "hasOverflow": false
-      },
-      "mobileOverflow": {
-        "scrollWidth": 375,
-        "clientWidth": 375,
-        "hasOverflow": false
+    "375x667": {
+      "label": "Mobile iPhone SE",
+      "width": 375,
+      "height": 667,
+      "routes": {
+        "dashboard": {
+          "scrollWidth": 375,
+          "clientWidth": 375,
+          "hasOverflow": false
+        },
+        "generate": {
+          "scrollWidth": 375,
+          "clientWidth": 375,
+          "hasOverflow": false
+        },
+        "lab": {
+          "scrollWidth": 375,
+          "clientWidth": 375,
+          "hasOverflow": false
+        },
+        "evaluation": {
+          "scrollWidth": 375,
+          "clientWidth": 375,
+          "hasOverflow": false
+        },
+        "prompts": {
+          "scrollWidth": 375,
+          "clientWidth": 375,
+          "hasOverflow": false
+        }
       }
     }
   },
-  "interactiveTests": {
-    "validation": {
-      "errors": [
-        "Topic is required (3-150 chars)",
-        "Primary keyword is required",
-        "Industry is required",
-        "Target market is required",
-        "Target audience is required"
-      ]
+  "interactiveTests": {},
+  "sidebarTests": {
+    "desktop": {
+      "initialWidth": 250,
+      "collapsedWidth": 68,
+      "reclaimedSpace": 182,
+      "overflowWhileCollapsed": false
     },
-    "generate": {
-      "title": "Generated SEO Content Package",
-      "meta": "Generated in 0.3s · Mock Provider (Offline Fixtures)",
-      "activeTabHeading": "Indoor Hydroponic Gardening: A Guide for Beginners",
-      "tabs": [
-        "Article Draft",
-        "SEO Titles (5)",
-        "Meta Description",
-        "Keywords",
-        "Outline",
-        "FAQs (5)",
-        "Quality Checklist\n83 pts"
-      ]
-    },
-    "lab": {
-      "badges": [
-        "20/100 pts\nArticle: 20/60 · Metadata: 0/40 (Omitted)",
-        "83/100 pts\nArticle: 43/60 · Metadata: 40/40"
-      ],
-      "simpleTag": "MODE A · BASELINE",
-      "improvedTag": "MODE B · ENGINEERED",
-      "diffRowCount": 0
+    "mobile": {
+      "initialOffscreen": true,
+      "openSuccess": true,
+      "backdropDismissSuccess": true,
+      "escapeDismissSuccess": true
     }
   },
   "consoleErrors": [],
