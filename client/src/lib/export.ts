@@ -14,7 +14,7 @@ export function formatPackageMarkdown(run: PackageRun): string {
 
   let md = `# SEO Content Package: ${input.primaryKeyword}
 
-Generated on ${dateStr} by RankCraft AI
+Generated on ${dateStr} by AI SEO Content Assistant
 Model: ${run.meta.isMock ? 'Mock Provider' : 'Live LLM Provider'}
 Target Market: ${input.market} | Intent: ${input.intent} | Language: ${input.language}
 Target Word Count: ${input.wordCount}

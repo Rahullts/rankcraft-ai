@@ -19,7 +19,8 @@ promptsRouter.get('/prompts', (req: Request, res: Response) => {
     model: config.LLM_MODEL,
     latencyMs: 1,
     attempts: 1,
-    mock: config.LLM_PROVIDER === 'mock'
+    mock: config.LLM_PROVIDER === 'mock',
+    isMock: config.LLM_PROVIDER === 'mock'
   };
 
   const response: ApiResponse<{

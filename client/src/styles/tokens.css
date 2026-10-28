@@ -1,40 +1,70 @@
 :root {
-  /* Colors from Section C2 */
-  --bg: #F7F8FA;
+  /* Linear & Stripe Inspired SaaS Color Palette */
+  --bg: #F6F7FB;
   --surface: #FFFFFF;
-  --border: #E3E6EC;
-  --text: #111827;
-  --text-muted: #4B5563;
-  --primary: #4F46E5;
-  --primary-hover: #4338CA;
-  --primary-subtle: #EEF2FF;
-  --improved: #0F766E;
+  --surface-hover: #F9FAFC;
+  --border: #E3E8EF;
+  --border-focus: #5B4BDB;
+  --text: #172033;
+  --text-muted: #667085;
+  --text-subtle: #98A2B3;
+  
+  /* Brand Accent: Rich Indigo / Violet (#5B4BDB) */
+  --primary: #5B4BDB;
+  --primary-hover: #4C3EC9;
+  --primary-subtle: #F0EEFC;
+  --primary-glow: rgba(91, 75, 219, 0.12);
+  
+  /* Semantic Status Colors */
+  --improved: #0E7490;
   --simple: #475569;
-  --success: #15803D;
-  --warning: #B45309;
-  --danger: #B91C1C;
+  --success: #059669;
+  --success-subtle: #ECFDF5;
+  --warning: #D97706;
+  --warning-subtle: #FFFBEB;
+  --danger: #DC2626;
+  --danger-subtle: #FEF2F2;
+
+  /* Deep Navy Sidebar */
   --sidebar-bg: #111827;
-  --sidebar-text: #E5E7EB;
+  --sidebar-hover: #1F2937;
+  --sidebar-text: #F3F4F6;
+  --sidebar-muted: #9CA3AF;
+  --sidebar-border: #1F2937;
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Spacing Scale: 4, 8, 12, 16, 24, 32, 48 px */
+  /* Spacing Scale */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
   --space-12: 48px;
 
   /* Radii */
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-pill: 999px;
 
+  /* Elevation Shadows (Restrained & Layered) */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.06), 0 2px 4px -2px rgba(16, 24, 40, 0.04);
+  --shadow-lg: 0 12px 16px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
+
   /* Focus Ring */
-  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--primary);
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px rgba(91, 75, 219, 0.35);
+
+  /* Transitions */
+  --transition-fast: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }

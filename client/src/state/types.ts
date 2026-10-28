@@ -48,6 +48,9 @@ export interface ApiMeta {
   model: string;
   retries?: number;
   isMock: boolean;
+  mock?: boolean;
+  repaired?: boolean;
+  provider?: string;
 }
 
 export type StageId = 'strategy' | 'outline' | 'article' | 'faqs' | 'checklist' | 'done';
@@ -104,5 +107,7 @@ export interface ProviderHealth {
   provider: 'mock' | 'anthropic' | 'openai-compatible';
   model: string;
   configured: boolean;
+  isMock?: boolean;
+  mock?: boolean;
   message?: string;
 }

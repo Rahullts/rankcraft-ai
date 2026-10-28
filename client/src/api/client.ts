@@ -56,7 +56,9 @@ export const api = {
       status: data.configured ? 'ready' : 'unconfigured',
       provider: data.provider || 'mock',
       model: data.model || 'mock-model',
-      configured: !!data.configured
+      configured: !!data.configured,
+      isMock: data.provider === 'mock' || !!data.mock,
+      mock: data.provider === 'mock' || !!data.mock
     };
   },
 

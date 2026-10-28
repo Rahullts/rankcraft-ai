@@ -9,7 +9,7 @@ import { callProviderWithJsonValidation, callProviderWithMarkdownValidation } fr
 import { config } from '../config.js';
 import { ApiMeta, ApiResponse, AppError } from '../lib/errors.js';
 import { logEvent } from '../lib/logger.js';
-import { validateAndRepairMetaDescription } from '../lib/metaGenerator.js';
+import { validateAndRepairMetaDescription, checkAndRepairMetaDescription } from '../lib/metaGenerator.js';
 
 export const generateRouter = Router();
 
@@ -75,21 +75,24 @@ generateRouter.post('/strategy', async (req: Request, res: Response, next) => {
       outputTokens: callRes.usage?.outputTokens
     });
 
+    const repairResult = checkAndRepairMetaDescription(
+      callRes.data.metaDescription,
+      input.primaryKeyword,
+      input.topic
+    );
+    const strategy = callRes.data;
+    strategy.metaDescription = repairResult.text;
+
     const meta: ApiMeta = {
       provider: provider.name,
       model: config.LLM_MODEL,
       latencyMs: Math.round(latencyMs),
       attempts: callRes.attempts,
       mock: provider.name === 'mock',
+      isMock: provider.name === 'mock',
+      repaired: repairResult.wasRepaired,
       usage: callRes.usage
     };
-
-    const strategy = callRes.data;
-    strategy.metaDescription = validateAndRepairMetaDescription(
-      strategy.metaDescription,
-      input.primaryKeyword,
-      input.topic
-    );
 
     const response: ApiResponse<{ strategy: Strategy }> = {
       ok: true,
@@ -172,6 +175,7 @@ generateRouter.post('/outline', async (req: Request, res: Response, next) => {
       latencyMs: Math.round(latencyMs),
       attempts: callRes.attempts,
       mock: provider.name === 'mock',
+      isMock: provider.name === 'mock',
       usage: callRes.usage
     };
 
@@ -263,6 +267,7 @@ generateRouter.post('/article', async (req: Request, res: Response, next) => {
       latencyMs: Math.round(latencyMs),
       attempts: callRes.attempts,
       mock: provider.name === 'mock',
+      isMock: provider.name === 'mock',
       usage: callRes.usage
     };
 
@@ -352,6 +357,7 @@ generateRouter.post('/faqs', async (req: Request, res: Response, next) => {
       latencyMs: Math.round(latencyMs),
       attempts: callRes.attempts,
       mock: provider.name === 'mock',
+      isMock: provider.name === 'mock',
       usage: callRes.usage
     };
 

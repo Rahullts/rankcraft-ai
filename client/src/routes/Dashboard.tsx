@@ -189,7 +189,7 @@ export const Dashboard: React.FC = () => {
               <div className="status-item">
                 <CheckCircle2 size={16} className="text-success" />
                 <div>
-                  <strong>LLM Provider:</strong> {state.provider?.provider || 'Mock'} (<code>{state.provider?.model || 'mock-v1'}</code>)
+                  <strong>LLM Provider:</strong> {state.provider?.isMock !== false ? 'Mock Mode (Offline Fixtures)' : `${state.provider.provider} (${state.provider.model})`}
                 </div>
               </div>
               <div className="status-item">

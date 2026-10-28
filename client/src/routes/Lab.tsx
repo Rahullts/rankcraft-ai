@@ -37,6 +37,22 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
 
   const commonRules = ['R4', 'R5', 'R6', 'R8', 'R9', 'R10'];
 
+  const getArticleScore = (evalObj?: any) => {
+    if (!evalObj?.rules) return 0;
+    const articleRuleIds = ['R4', 'R5', 'R6', 'R8', 'R9', 'R10'];
+    return evalObj.rules
+      .filter((r: any) => articleRuleIds.includes(r.id))
+      .reduce((sum: number, r: any) => sum + r.points, 0);
+  };
+
+  const getMetadataScore = (evalObj?: any) => {
+    if (!evalObj?.rules) return 0;
+    const metaRuleIds = ['R1', 'R2', 'R3', 'R7'];
+    return evalObj.rules
+      .filter((r: any) => metaRuleIds.includes(r.id))
+      .reduce((sum: number, r: any) => sum + r.points, 0);
+  };
+
   return (
     <div className="lab-page">
       {/* Header */}
@@ -75,16 +91,16 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
               <ul className="fairness-list">
                 <li><strong>Input Parameters:</strong> Topic: "{state.input.topic || 'Growing herbs at home'}", Keyword: "{state.input.primaryKeyword || 'indoor herb garden'}"</li>
                 <li><strong>Target Scope:</strong> Market: {state.input.market || 'United Kingdom'}, Language: {selectedLang} (Default: English), Word Count: {state.input.wordCount}</li>
-                <li><strong>Model & Environment:</strong> {state.provider ? `${state.provider.provider} (${state.provider.model})` : 'Mock Provider'}</li>
-                <li><strong>Sampling Parameters:</strong> Temperature = 0.3, Max Tokens = 3000 (fixed)</li>
-                <li><strong>Evaluation Instrument:</strong> Same deterministic 10-rule rubric (R1-R10)</li>
+                <li><strong>Model & Environment:</strong> {state.provider?.isMock !== false ? 'Mock Provider (Offline Fixtures)' : `${state.provider.provider} (${state.provider.model})`}</li>
+                <li><strong>Runtime Parameters:</strong> Temperature = 0.5 (Live LLM) / Deterministic Fixtures (Mock), dynamic token allocation</li>
+                <li><strong>Evaluation Instrument:</strong> Unified 100-point rubric engine with identical shared article evaluation rules (R4–R10)</li>
               </ul>
             </div>
             <div className="fairness-col">
               <h4 className="fairness-title text-primary">Experimental Treatment (Differed Variable)</h4>
               <ul className="fairness-list">
-                <li><strong>Mode A (Basic):</strong> Single-shot generic instruction without persona, explicit constraints, or structural staging.</li>
-                <li><strong>Mode B (Improved):</strong> 4-stage chained pipeline applying Role, Context, Constraints, Few-shot schemas, and JSON parsing.</li>
+                <li><strong>Mode A (Basic):</strong> Single-shot generic instruction without persona, explicit constraints, or structural staging. Produces article only (0/40 metadata components).</li>
+                <li><strong>Mode B (Improved):</strong> 4-stage chained pipeline applying Role, Context, Constraints, Few-shot schemas, and JSON parsing. Produces complete 5-component package.</li>
               </ul>
             </div>
           </div>
@@ -102,8 +118,13 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
             </div>
             {simpleRun?.evaluation && (
               <div className="mode-score-badge badge-simple">
-                <span className="score-val">{simpleRun.evaluation.totalPoints}</span>
-                <span className="score-max">/{simpleRun.evaluation.applicableAutomatedMax + 10} pts</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="score-val">{simpleRun.evaluation.totalPoints}</span>
+                  <span className="score-max">/100 pts</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '2px' }}>
+                  Article: {getArticleScore(simpleRun.evaluation)}/60 · Metadata: 0/40 (Omitted)
+                </div>
               </div>
             )}
           </div>
@@ -173,8 +194,13 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
             </div>
             {improvedRun?.evaluation && (
               <div className="mode-score-badge badge-improved">
-                <span className="score-val">{improvedRun.evaluation.totalPoints}</span>
-                <span className="score-max">/{improvedRun.evaluation.applicableAutomatedMax + 10} pts</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="score-val">{improvedRun.evaluation.totalPoints}</span>
+                  <span className="score-max">/100 pts</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '2px' }}>
+                  Article: {getArticleScore(improvedRun.evaluation)}/60 · Metadata: {getMetadataScore(improvedRun.evaluation)}/40
+                </div>
               </div>
             )}
           </div>

@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-10-28T04:07:10.890Z",
+  "timestamp": "2026-10-28T13:30:30.350Z",
   "routes": {
     "01-dashboard": {
       "label": "Dashboard",
       "url": "http://localhost:5173/",
-      "title": "SEO Assistant — Prompt Engineering Project",
-      "heading": "RankCraft AI",
+      "title": "AI SEO Content Assistant Using Prompt Engineering",
+      "heading": "AI SEO",
       "desktopOverflow": {
         "scrollWidth": 1280,
         "clientWidth": 1280,
@@ -20,8 +20,8 @@
     "02-generate": {
       "label": "Generate Package",
       "url": "http://localhost:5173/generate",
-      "title": "SEO Assistant — Prompt Engineering Project",
-      "heading": "RankCraft AI",
+      "title": "AI SEO Content Assistant Using Prompt Engineering",
+      "heading": "AI SEO",
       "desktopOverflow": {
         "scrollWidth": 1280,
         "clientWidth": 1280,
@@ -36,8 +36,8 @@
     "03-lab": {
       "label": "Prompt Engineering Lab",
       "url": "http://localhost:5173/lab",
-      "title": "SEO Assistant — Prompt Engineering Project",
-      "heading": "RankCraft AI",
+      "title": "AI SEO Content Assistant Using Prompt Engineering",
+      "heading": "AI SEO",
       "desktopOverflow": {
         "scrollWidth": 1280,
         "clientWidth": 1280,
@@ -52,8 +52,8 @@
     "04-evaluation": {
       "label": "Evaluation & Rubric",
       "url": "http://localhost:5173/evaluation",
-      "title": "SEO Assistant — Prompt Engineering Project",
-      "heading": "RankCraft AI",
+      "title": "AI SEO Content Assistant Using Prompt Engineering",
+      "heading": "AI SEO",
       "desktopOverflow": {
         "scrollWidth": 1280,
         "clientWidth": 1280,
@@ -68,8 +68,8 @@
     "05-prompts": {
       "label": "Prompts & Guide",
       "url": "http://localhost:5173/prompts",
-      "title": "SEO Assistant — Prompt Engineering Project",
-      "heading": "RankCraft AI",
+      "title": "AI SEO Content Assistant Using Prompt Engineering",
+      "heading": "AI SEO",
       "desktopOverflow": {
         "scrollWidth": 1280,
         "clientWidth": 1280,
@@ -94,7 +94,7 @@
     },
     "generate": {
       "title": "Generated SEO Content Package",
-      "meta": "Generated in 0.4s · Live LLM Provider",
+      "meta": "Generated in 0.3s · Mock Provider (Offline Fixtures)",
       "activeTabHeading": "Indoor Hydroponic Gardening: A Guide for Beginners",
       "tabs": [
         "Article Draft",
@@ -108,8 +108,8 @@
     },
     "lab": {
       "badges": [
-        "20\n/60 pts",
-        "83\n/100 pts"
+        "20/100 pts\nArticle: 20/60 · Metadata: 0/40 (Omitted)",
+        "83/100 pts\nArticle: 43/60 · Metadata: 40/40"
       ],
       "simpleTag": "MODE A · BASELINE",
       "improvedTag": "MODE B · ENGINEERED",

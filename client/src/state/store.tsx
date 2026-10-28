@@ -353,7 +353,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         manualReview: {},
         meta: {
           totalDurationMs: totalDuration,
-          isMock: stratRes.meta.isMock,
+          isMock: Boolean((stratRes.meta as any).isMock ?? (stratRes.meta as any).mock ?? (stratRes.meta?.provider === 'mock')),
           stages: stageMetas
         }
       };
@@ -439,7 +439,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         manualReview: {},
         meta: {
           totalDurationMs: Date.now() - startTime,
-          isMock: stratRes.meta.isMock,
+          isMock: Boolean((stratRes.meta as any).isMock ?? (stratRes.meta as any).mock ?? (stratRes.meta?.provider === 'mock')),
           stages: stageMetas
         }
       };

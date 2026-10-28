@@ -77,6 +77,7 @@ simpleRouter.post('/simple', async (req: Request, res: Response, next) => {
       latencyMs: Math.round(latencyMs),
       attempts: 1,
       mock: provider.name === 'mock',
+      isMock: provider.name === 'mock',
       usage: callRes.usage
     };
 

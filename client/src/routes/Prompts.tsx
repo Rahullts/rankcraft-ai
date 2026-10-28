@@ -95,7 +95,7 @@ export const Prompts: React.FC = () => {
         <div>
           <h2 className="page-title">Prompt Engineering Reference & Guide</h2>
           <p className="page-subtitle">
-            Complete documentation of the production prompt templates and scientific methodologies implemented in RankCraft AI.
+            Complete documentation of the production prompt templates and scientific methodologies implemented in AI SEO Content Assistant.
           </p>
         </div>
       </div>

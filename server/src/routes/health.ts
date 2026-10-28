@@ -13,7 +13,8 @@ healthRouter.get('/health', (req: Request, res: Response) => {
     model: config.LLM_MODEL,
     latencyMs: 1,
     attempts: 1,
-    mock: isMock
+    mock: isMock,
+    isMock: isMock
   };
 
   const response: ApiResponse<{

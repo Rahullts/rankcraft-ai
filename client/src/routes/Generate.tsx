@@ -389,7 +389,7 @@ export const Generate: React.FC = () => {
             <div className="results-title-group">
               <h3 className="results-title">Generated SEO Content Package</h3>
               <span className="results-meta">
-                Generated in {((currentPkg.meta.totalDurationMs || 0) / 1000).toFixed(1)}s · {currentPkg.meta.isMock ? 'Mock Provider' : 'Live LLM Provider'}
+                Generated in {((currentPkg.meta.totalDurationMs || 0) / 1000).toFixed(1)}s · {currentPkg.meta.isMock ? 'Mock Provider (Offline Fixtures)' : 'Live LLM Provider'}
               </span>
             </div>
 
@@ -571,9 +571,16 @@ export const Generate: React.FC = () => {
               <div className="card">
                 <div className="card-header">
                   <h4 className="card-title">Meta Description (Snippet Target: 155-160 Chars)</h4>
-                  <div className={`char-counter-pill ${isMetaLengthValid ? 'pill-good' : 'pill-warn'}`}>
-                    <span>{metaLength} / 160 chars</span>
-                    {isMetaLengthValid ? ' · Optimal' : ' · Needs adjustment'}
+                  <div className="flex items-center gap-2">
+                    {currentPkg.meta.stages?.strategy?.repaired && (
+                      <span className="pill-repaired" style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: '#FEF3C7', color: '#B45309', fontWeight: 500 }}>
+                        Auto-Repaired to Natural Sentence (155–160 chars)
+                      </span>
+                    )}
+                    <div className={`char-counter-pill ${isMetaLengthValid ? 'pill-good' : 'pill-warn'}`}>
+                      <span>{metaLength} / 160 chars</span>
+                      {isMetaLengthValid ? ' · Optimal' : ' · Needs adjustment'}
+                    </div>
                   </div>
                 </div>
                 <div className="card-body">

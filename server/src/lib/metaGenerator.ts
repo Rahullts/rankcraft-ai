@@ -160,12 +160,16 @@ export function isValidMetaDescription(meta: string, primaryKw?: string): boolea
   return true;
 }
 
+export function checkAndRepairMetaDescription(meta: string, primaryKw: string, topic?: string): { text: string; wasRepaired: boolean } {
+  if (isValidMetaDescription(meta, primaryKw)) {
+    return { text: meta.trim(), wasRepaired: false };
+  }
+  return { text: generateNaturalMetaDescription(primaryKw, topic), wasRepaired: true };
+}
+
 /**
  * Validates the meta description and repairs it if incomplete, truncated, or outside 155-160 chars.
  */
 export function validateAndRepairMetaDescription(meta: string, primaryKw: string, topic?: string): string {
-  if (isValidMetaDescription(meta, primaryKw)) {
-    return meta.trim();
-  }
-  return generateNaturalMetaDescription(primaryKw, topic);
+  return checkAndRepairMetaDescription(meta, primaryKw, topic).text;
 }

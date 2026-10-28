@@ -38,6 +38,8 @@ export interface ApiMeta {
   latencyMs: number;
   attempts: number;
   mock: boolean;
+  isMock: boolean;
+  repaired?: boolean;
   usage?: {
     inputTokens?: number;
     outputTokens?: number;

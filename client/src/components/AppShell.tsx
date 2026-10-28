@@ -51,10 +51,12 @@ export const AppShell: React.FC = () => {
         <aside className={`sidebar ${mobileOpen ? 'open' : ''}`} aria-label="Main Navigation">
           <div className="sidebar-header">
             <div className="brand">
-              <span className="brand-icon">⚡</span>
-              <div>
-                <h1 className="brand-title">RankCraft AI</h1>
-                <span className="brand-sub">Academic Capstone</span>
+              <div className="brand-icon-box">
+                <Sparkles size={20} className="brand-icon-svg" />
+              </div>
+              <div className="brand-text">
+                <h1 className="brand-title">AI SEO</h1>
+                <span className="brand-sub">Content Assistant</span>
               </div>
             </div>
             <button
