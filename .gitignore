@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+tools/node_modules/
+
+# Environment variables & secrets (Rule 4: Never commit live keys or env files)
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+
+# Production builds
+dist/
+client/dist/
+server/dist/
+
+# Test coverage
+coverage/
+
+# Logs and runtime artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.system_generated/
+*.tmp
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

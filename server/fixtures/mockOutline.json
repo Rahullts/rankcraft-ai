@@ -1,0 +1,29 @@
+{
+  "intro": "Hook the reader with culinary aroma, state the primary keyword in the opening paragraphs, and outline the setup roadmap.",
+  "sections": [
+    {
+      "h2": "Choosing the Best Spot for Your Indoor Herb Garden",
+      "h3": ["Windowsill sunlight guidelines", "Supplementing with compact grow lights"],
+      "purpose": "Help beginners locate the ideal sunny zone in their kitchen.",
+      "targetWords": 200
+    },
+    {
+      "h2": "Selecting Pots, Soil, and Drainage Essentials",
+      "h3": ["Pot diameter and saucer drainage", "Potting mix aeration"],
+      "purpose": "Provide concrete advice on container and soil choices.",
+      "targetWords": 180
+    },
+    {
+      "h2": "Indoor Herb Garden Watering and Daily Care",
+      "h3": ["The soil moisture finger test", "Pruning rules for bushier herbs"],
+      "purpose": "Explain simple watering routines and harvesting hygiene.",
+      "targetWords": 180
+    },
+    {
+      "h2": "Conclusion: Start Your Indoor Herb Garden Today",
+      "h3": [],
+      "purpose": "Summarise main takeaways and give one clear next step.",
+      "targetWords": 160
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+@import './tokens.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 22px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Global Link Reset (Addresses Problem #1: No default blue underlines) */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* Accessibility: Skip Link */
+.skip-link {
+  position: absolute;
+  top: -999px;
+  left: 16px;
+  background: var(--primary);
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 1000;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 16px;
+}
+
+/* Focus outline everywhere */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Typography styles per spec C2 */
+h1, .page-title {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+h2, .section-title {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+h3, .card-title {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+h4 {
+  font-size: 13.5px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+p, .body-text {
+  font-size: 13.5px;
+  line-height: 21px;
+  font-weight: 400;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.article-preview {
+  font-size: 15px;
+  line-height: 26px;
+  font-weight: 400;
+}
+
+.caption, .chip-text {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Transitions & Reduced Motion (Section C4 & C5) */
+button, a, input, select, textarea, .tab-btn {
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, opacity 150ms ease, box-shadow 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Common Utility Classes */
+.text-primary { color: var(--primary) !important; }
+.text-muted { color: var(--text-muted) !important; }
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-danger { color: var(--danger) !important; }
+.text-center { text-align: center; }
+.text-sm { font-size: 12.5px; }
+.text-xs { font-size: 11px; }
+.text-base { font-size: 14px; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-normal { font-weight: 400; }
+
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }

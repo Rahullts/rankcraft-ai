@@ -1,0 +1,121 @@
+{
+  "timestamp": "2026-10-28T04:07:10.890Z",
+  "routes": {
+    "01-dashboard": {
+      "label": "Dashboard",
+      "url": "http://localhost:5173/",
+      "title": "SEO Assistant — Prompt Engineering Project",
+      "heading": "RankCraft AI",
+      "desktopOverflow": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "hasOverflow": false
+      },
+      "mobileOverflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "hasOverflow": false
+      }
+    },
+    "02-generate": {
+      "label": "Generate Package",
+      "url": "http://localhost:5173/generate",
+      "title": "SEO Assistant — Prompt Engineering Project",
+      "heading": "RankCraft AI",
+      "desktopOverflow": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "hasOverflow": false
+      },
+      "mobileOverflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "hasOverflow": false
+      }
+    },
+    "03-lab": {
+      "label": "Prompt Engineering Lab",
+      "url": "http://localhost:5173/lab",
+      "title": "SEO Assistant — Prompt Engineering Project",
+      "heading": "RankCraft AI",
+      "desktopOverflow": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "hasOverflow": false
+      },
+      "mobileOverflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "hasOverflow": false
+      }
+    },
+    "04-evaluation": {
+      "label": "Evaluation & Rubric",
+      "url": "http://localhost:5173/evaluation",
+      "title": "SEO Assistant — Prompt Engineering Project",
+      "heading": "RankCraft AI",
+      "desktopOverflow": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "hasOverflow": false
+      },
+      "mobileOverflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "hasOverflow": false
+      }
+    },
+    "05-prompts": {
+      "label": "Prompts & Guide",
+      "url": "http://localhost:5173/prompts",
+      "title": "SEO Assistant — Prompt Engineering Project",
+      "heading": "RankCraft AI",
+      "desktopOverflow": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "hasOverflow": false
+      },
+      "mobileOverflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "hasOverflow": false
+      }
+    }
+  },
+  "interactiveTests": {
+    "validation": {
+      "errors": [
+        "Topic is required (3-150 chars)",
+        "Primary keyword is required",
+        "Industry is required",
+        "Target market is required",
+        "Target audience is required"
+      ]
+    },
+    "generate": {
+      "title": "Generated SEO Content Package",
+      "meta": "Generated in 0.4s · Live LLM Provider",
+      "activeTabHeading": "Indoor Hydroponic Gardening: A Guide for Beginners",
+      "tabs": [
+        "Article Draft",
+        "SEO Titles (5)",
+        "Meta Description",
+        "Keywords",
+        "Outline",
+        "FAQs (5)",
+        "Quality Checklist\n83 pts"
+      ]
+    },
+    "lab": {
+      "badges": [
+        "20\n/60 pts",
+        "83\n/100 pts"
+      ],
+      "simpleTag": "MODE A · BASELINE",
+      "improvedTag": "MODE B · ENGINEERED",
+      "diffRowCount": 0
+    }
+  },
+  "consoleErrors": [],
+  "failedRequests": []
+}

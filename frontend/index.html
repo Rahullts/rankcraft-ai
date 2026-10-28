@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RankCraft AI - AI SEO Content Assistant</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/public/css/styles.css">
+
+  <!-- Local Tailwind CSS -->
+  <script src="/public/vendor/tailwind.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Local React 18, ReactDOM & Babel Standalone (100% Offline Capable) -->
+  <script src="/public/vendor/react.production.min.js"></script>
+  <script src="/public/vendor/react-dom.production.min.js"></script>
+  <script src="/public/vendor/babel.min.js"></script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white">
+  <!-- React Mount Point -->
+  <div id="root">
+    <!-- Initial Loading Fallback before Babel transpilation -->
+    <div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:sans-serif;color:#64748b;background:#f8fafc;">
+      <div style="text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🚀</div>
+        <h2 style="font-size:1.25rem;font-weight:700;color:#0f172a;margin-bottom:6px;">RankCraft AI</h2>
+        <p style="font-size:0.875rem;">Initializing React & TypeScript Engine...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Script (Transpiled client-side by Babel) -->
+  <script type="text/babel" data-presets="react,typescript" src="/public/bundle.tsx"></script>
+</body>
+</html>
