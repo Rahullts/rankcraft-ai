@@ -1,18 +1,18 @@
-# ⚡ RankCraft AI: AI SEO Content Assistant Using Prompt Engineering
+# ⚡ AI SEO Content Assistant Using Prompt Engineering
 
 > **Academic Capstone Project (35 Marks)**  
 > **Course:** Computer Science & Engineering (B.Tech / B.Sc / MCA)  
 > **Specialization:** Generative AI & Prompt Engineering Systems  
 > **Student Name:** Rahul  
-> **Status:** Fully Implemented & Verified (All 12 Features F01-F12 Passing)
+> **Status:** Fully Implemented & Verified (49/49 Automated Tests Passing)
 
 ---
 
 ## 🌟 Executive Summary
 
-**RankCraft AI** is a professional full-stack web application that generates search-optimized technical content from user topics while empirically demonstrating how **systematic prompt engineering techniques** improve model output quality, structural conformity, and constraint adherence.
+**AI SEO Content Assistant Using Prompt Engineering** is a full-stack web application that generates search-optimized technical content from user topics while empirically demonstrating how **systematic prompt engineering techniques** improve model output quality, structural conformity, and constraint adherence.
 
-The cornerstone academic feature is the **Prompt Engineering Lab (A/B Test)**, which benchmarks an unconstrained single-shot prompt (**Mode A: Basic**) against a 4-stage chained prompt pipeline (**Mode B: Improved**) under identical sampling parameters (Temperature 0.3, Max Tokens 3000, identical inputs). Outputs are evaluated by an objective, deterministic **10-rule rubric (R1-R10)** that is fully explainable in an academic viva.
+The cornerstone academic feature is the **Prompt Engineering Lab (A/B Test)**, which benchmarks an unconstrained single-shot prompt (**Mode A: Basic**) against a 4-stage chained prompt pipeline (**Mode B: Improved**) under identical inputs and controlled sampling parameters (Temperature 0.5 on live provider / deterministic fixtures on mock provider, dynamic token allocation). Outputs are evaluated by an objective, deterministic **100-point rubric (R1-R10)** that is fully explainable in an academic viva.
 
 ---
 
@@ -95,11 +95,11 @@ npm install
 
 ### Step 2: Run Unit Tests
 ```bash
-# Test backend routes, schemas, and prompt rendering (9 tests):
+# Test backend routes, content quality, language consistency, and prompt rendering (37 tests across 4 suites):
 cd server
 npm test
 
-# Test frontend text utilities and 100-point rubric evaluator (12 tests):
+# Test frontend text utilities and 100-point rubric evaluator (12 tests across 2 suites):
 cd ../client
 npm test
 ```
@@ -202,3 +202,12 @@ rankcraft-ai/
   *Through explicit character boundaries in the prompt (155-160 chars), few-shot exemplars with exact length counts, and an automated rule (R2) in the deterministic evaluator.*
 - **Why are scores calculated by code rather than an LLM?**  
   *Using an LLM to evaluate an LLM creates circular logic and hallucinations. Deterministic string algorithms (word counting, regex matching, AST hierarchy checks) provide 100% reproducible and verifiable grades.*
+
+---
+
+## ⚖️ Academic Scope, Honesty & Limitations
+
+1. **Heuristic Evaluation vs. Search Engine Ranking:** The rubric scores generated content against explicit editorial and on-page SEO best practices (character lengths, heading hierarchies, keyword distribution, readability, claim hygiene). It does **not** query proprietary search engine ranking algorithms or simulate Google Search Console indexation.
+2. **Search Volume & Difficulty Metrics:** The platform does not display arbitrary or unverified search volume, CPC, or keyword difficulty numbers. Keyword suggestions are structured semantically around the user's primary topic.
+3. **Default Offline Mock Mode:** The project is configured by default to use deterministic mock fixtures so it can be evaluated, demonstrated, and audited completely offline without external API dependencies or paid API keys.
+4. **Live Provider Configuration:** Support for live LLM providers (Anthropic Claude 3.5 Sonnet, OpenAI GPT-4o, or OpenAI-compatible endpoints) is built in, requiring user-supplied API keys placed strictly in the server environment. No live model claims are made unless live credentials are authenticated.
