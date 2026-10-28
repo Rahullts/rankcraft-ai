@@ -62,7 +62,7 @@ export const Dashboard: React.FC = () => {
       {/* Hero Card */}
       <section className="hero-card">
         <div className="hero-content">
-          <div className="hero-badge">35-Mark Academic Capstone</div>
+          <div className="hero-badge">AI-Powered SEO Content Generation</div>
           <h2 className="hero-title">AI SEO Content Assistant Using Prompt Engineering</h2>
           <p className="hero-desc">
             An end-to-end full-stack platform demonstrating how systematic prompt engineering techniques (role definition, audience constraints, few-shot schemas, and staged generation) produce verifiable, high-scoring SEO content compared to basic prompts.

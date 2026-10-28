@@ -1,6 +1,6 @@
 # ⚡ AI SEO Content Assistant Using Prompt Engineering
 
-> **Academic Capstone Project (35 Marks)**  
+> **Academic Capstone Project · AI SEO Content Assistant**  
 > **Course:** Computer Science & Engineering (B.Tech / B.Sc / MCA)  
 > **Specialization:** Generative AI & Prompt Engineering Systems  
 > **Student Name:** Rahul  
@@ -185,7 +185,7 @@ rankcraft-ai/
 │   ├── SPEC.md                  # Complete Version 1.0 specification
 │   ├── DECISIONS.md             # Architecture Decision Records (ADRs)
 │   ├── TEST_LOG.md              # Quality Assurance & real verification log
-│   ├── PROJECT_REPORT.md        # Comprehensive 35-mark academic project report
+│   ├── PROJECT_REPORT.md        # Comprehensive academic project report
 │   ├── PROMPT_ENGINEERING_GUIDE # Viva reference guide on prompt techniques
 │   ├── FACULTY_VIVA_QA.md       # 20 faculty viva questions with answers
 │   └── TESTING_REPORT.md        # Detailed test execution report

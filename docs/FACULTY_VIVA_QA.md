@@ -1,7 +1,7 @@
 # Faculty Viva Voce & Presentation Defense Guide
 
 ## Project: AI SEO Content Assistant Using Prompt Engineering (RankCraft AI)
-**Course:** 35-Mark Academic Capstone Project  
+**Course:** Academic Capstone Project  
 **Preparation:** Top 20 viva questions asked by academic examiners and project review panels, complete with authoritative, student-friendly answers.
 
 ---

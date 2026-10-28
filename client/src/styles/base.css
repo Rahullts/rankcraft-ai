@@ -13,8 +13,9 @@ html {
 
 html, body {
   width: 100%;
+  height: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -24,11 +25,12 @@ html, body {
 }
 
 #root {
+  height: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* Global Link Reset (Addresses Problem #1: No default blue underlines) */

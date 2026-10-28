@@ -3,7 +3,7 @@
 ## AI SEO Content Assistant Using Prompt Engineering
 **Application Name:** RankCraft AI  
 **Course / Degree:** Bachelor of Technology / Science in Computer Science & Engineering  
-**Academic Weightage:** 35 Marks Capstone Project  
+**Project Type:** Capstone Project  
 **Submission Date:** Academic Session 2026-2027  
 **Candidate Name:** [Student Name Placeholder]  
 **Roll / Registration Number:** [Student ID Placeholder]  
@@ -266,7 +266,7 @@ Running both modes on the topic *"Cloud Database Performance Optimization"* with
 ---
 
 ### 15. CONCLUSION
-The RankCraft AI project successfully accomplishes all design and academic objectives for a 35-mark capstone project. By systematically analyzing the differences between naive prompting and formal prompt engineering, the project empirically proves that structured role prompting, boundary constraints, search intent grounding, and deterministic JSON schemas transform inconsistent LLM outputs into publication-grade, search-optimized technical content.
+The RankCraft AI project successfully accomplishes all design and academic objectives for a formal capstone project. By systematically analyzing the differences between naive prompting and formal prompt engineering, the project empirically proves that structured role prompting, boundary constraints, search intent grounding, and deterministic JSON schemas transform inconsistent LLM outputs into publication-grade, search-optimized technical content.
 
 ---
 

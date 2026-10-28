@@ -1,6 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { config } from './config.js';
 import { healthRouter } from './routes/health.js';
 import { promptsRouter } from './routes/prompts.js';
@@ -8,6 +11,9 @@ import { generateRouter } from './routes/generate.js';
 import { simpleRouter } from './routes/simple.js';
 import { AppError, ApiErrorResponse } from './lib/errors.js';
 import { logEvent } from './lib/logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -65,11 +71,36 @@ if (process.env.NODE_ENV !== 'test') {
   app.use('/api', apiLimiter);
 }
 
-// 4. Routes
+// 4. API Routes
 app.use('/api', healthRouter);
 app.use('/api', promptsRouter);
 app.use('/api', generateRouter);
 app.use('/api', simpleRouter);
+
+// 5. Static Assets & Production SPA Serving (Single-Service Cloud Deployment)
+const clientDist = path.resolve(__dirname, '../../client/dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+
+  // SPA fallback: return index.html for all non-API GET requests
+  app.get('*', (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.resolve(clientDist, 'index.html'));
+  });
+}
+
+// 6. JSON 404 handler for undefined /api endpoints
+app.all('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({
+    ok: false,
+    error: {
+      code: 'NOT_FOUND',
+      message: `API endpoint ${req.method} ${req.originalUrl} not found.`
+    }
+  });
+});
 
 // 5. Centralized Error Handler
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {

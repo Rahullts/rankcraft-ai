@@ -78,23 +78,11 @@ export const AppShell: React.FC = () => {
   }, [mobileOpen]);
 
   return (
-    <div className={`app-layout ${isMock ? 'has-mock-banner' : ''} ${desktopCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`app-layout ${desktopCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Skip to main content for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-
-      {/* Persistent Mock Provider Demo Banner (Compact & Responsive) */}
-      {isMock && (
-        <aside className="mock-banner" role="status" aria-label="Demo provider notification">
-          <div className="banner-content">
-            <span className="banner-badge">DEMO MODE</span>
-            <span className="banner-text">
-              Running with <strong>Mock Provider</strong> (offline fixtures for academic evaluation & viva). Live Anthropic or OpenAI keys can be configured in <code>server/.env</code>.
-            </span>
-          </div>
-        </aside>
-      )}
 
       {/* Backdrop overlay for mobile drawer */}
       {mobileOpen && (
@@ -186,7 +174,7 @@ export const AppShell: React.FC = () => {
                   </div>
                 </div>
                 <div className="academic-tag">
-                  Prompt Engineering Capstone · 35 Marks
+                  Prompt Engineering Platform
                 </div>
               </>
             ) : (
