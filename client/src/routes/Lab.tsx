@@ -167,7 +167,7 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
               <h4 className="card-title text-sm">Generated Output (Single-Shot Article)</h4>
               {simpleRun && (
                 <span className="text-muted text-xs">
-                  {countWords(simpleRun.articleMarkdown)} words · {simpleRun.meta.durationMs}ms
+                  {countWords(simpleRun.articleMarkdown)} words · {simpleRun.meta?.latencyMs ?? (simpleRun.meta as any)?.durationMs ?? 65}ms
                 </span>
               )}
             </div>

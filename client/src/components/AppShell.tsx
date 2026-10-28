@@ -78,7 +78,7 @@ export const AppShell: React.FC = () => {
   }, [mobileOpen]);
 
   return (
-    <div className={`app-layout ${desktopCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`app-layout ${isMock ? 'has-mock-banner' : ''} ${desktopCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Skip to main content for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content

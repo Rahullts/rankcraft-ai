@@ -541,8 +541,10 @@ export const Generate: React.FC = () => {
                     {currentPkg.strategy?.titles.map((title, i) => (
                       <div key={i} className="title-item-card">
                         <div className="title-item-header">
-                          <span className="title-num">0{i + 1}</span>
-                          <span className="title-angle-badge">{title.angle}</span>
+                          <div className="title-num-group">
+                            <span className="title-num">0{i + 1}</span>
+                            <span className="title-angle-badge">{title.angle}</span>
+                          </div>
                           <span className={`title-len-badge ${title.text.length >= 30 && title.text.length <= 60 ? 'good' : 'warning'}`}>
                             {title.text.length} chars
                           </span>

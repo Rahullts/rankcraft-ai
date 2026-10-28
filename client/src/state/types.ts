@@ -44,7 +44,8 @@ export interface FaqItem {
 }
 
 export interface ApiMeta {
-  durationMs: number;
+  durationMs?: number;
+  latencyMs?: number;
   model: string;
   retries?: number;
   isMock: boolean;
