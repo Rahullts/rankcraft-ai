@@ -1,15 +1,15 @@
 /**
- * Text processing and measurement utilities strictly implementing Section E7.
+ * Text processing and measurement utilities strictly implementing Section E7 and Rubric R1-R10.
  */
 
 export function countWords(markdownText: string): number {
   if (!markdownText || !markdownText.trim()) return 0;
 
-  // 1. Strip markdown symbols
+  // 1. Strip code blocks first before backtick stripping
   let clean = markdownText
+    .replace(/```[\s\S]*?```/g, '') // code blocks first
     .replace(/^#+\s+/gm, '') // headings
     .replace(/[*_`]/g, '') // bold, italics, inline code
-    .replace(/```[\s\S]*?```/g, '') // code blocks
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // link syntax keeping link text
     .replace(/^[-*+]\s+/gm, '') // unordered lists
     .replace(/^\d+\.\s+/gm, ''); // ordered lists
@@ -66,31 +66,208 @@ export function splitSentences(markdownText: string): string[] {
   return rawSentences.map((s) => s.trim()).filter((s) => s.length > 2);
 }
 
-// Patterns flagged by Rule R9
-export const UNSUPPORTED_PATTERNS = [
-  /\b\d+(\.\d+)?%/i, // percentages
-  /\b(studies\s+show|research\s+shows|according\s+to)\b/i,
-  /\b(statistics|statistically)\b/i,
-  /\b\d+\s*(million|billion|thousand)\b/i,
-  /\branked\s+(number\s*1|#1|first)\b/i,
-  /\bguaranteed\b/i,
-  /\bsearch\s+volume\b/i
+// -----------------------------------------------------------------------------
+// Markdown Heading Parser & Hierarchy Audit (Rule R4 & Outline Fidelity)
+// -----------------------------------------------------------------------------
+export interface ParsedHeading {
+  level: number;
+  text: string;
+  raw: string;
+  lineIndex: number;
+}
+
+export interface HeadingHierarchyAudit {
+  headings: ParsedHeading[];
+  h1Headings: ParsedHeading[];
+  h2Headings: ParsedHeading[];
+  h3Headings: ParsedHeading[];
+  h4PlusHeadings: ParsedHeading[];
+  h1Count: number;
+  h2Count: number;
+  h3Count: number;
+  h4PlusCount: number;
+  h2WithH3Count: number;
+  invalidJumps: Array<{ from: number; to: number; heading: string }>;
+  emptyOrPlaceholder: Array<{ text: string; level: number; reason: string }>;
+  isHierarchyClean: boolean;
+}
+
+export function parseMarkdownHeadings(markdownText: string): HeadingHierarchyAudit {
+  if (!markdownText || !markdownText.trim()) {
+    return {
+      headings: [],
+      h1Headings: [],
+      h2Headings: [],
+      h3Headings: [],
+      h4PlusHeadings: [],
+      h1Count: 0,
+      h2Count: 0,
+      h3Count: 0,
+      h4PlusCount: 0,
+      h2WithH3Count: 0,
+      invalidJumps: [],
+      emptyOrPlaceholder: [],
+      isHierarchyClean: false
+    };
+  }
+
+  // Split lines while tracking code fences to ignore headings inside code blocks
+  const lines = markdownText.split('\n');
+  const headings: ParsedHeading[] = [];
+  let inCodeBlock = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+
+    const headingMatch = trimmed.match(/^(#{1,6})\s*(.*)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const text = headingMatch[2].trim();
+      headings.push({
+        level,
+        text,
+        raw: trimmed,
+        lineIndex: i
+      });
+    }
+  }
+
+  const h1Headings = headings.filter((h) => h.level === 1);
+  const h2Headings = headings.filter((h) => h.level === 2);
+  const h3Headings = headings.filter((h) => h.level === 3);
+  const h4PlusHeadings = headings.filter((h) => h.level >= 4);
+
+  // Hierarchy validation: check for level skips (e.g. H1 -> H3 without H2, H2 -> H4 without H3)
+  const invalidJumps: Array<{ from: number; to: number; heading: string }> = [];
+  let lastLevel = 0;
+
+  for (const h of headings) {
+    if (lastLevel > 0 && h.level > lastLevel + 1) {
+      invalidJumps.push({
+        from: lastLevel,
+        to: h.level,
+        heading: h.text
+      });
+    }
+    lastLevel = h.level;
+  }
+
+  // Detect empty or placeholder headings
+  const emptyOrPlaceholder: Array<{ text: string; level: number; reason: string }> = [];
+  for (const h of headings) {
+    if (h.text.length < 3) {
+      emptyOrPlaceholder.push({ text: h.text, level: h.level, reason: 'Heading text is too short (< 3 chars)' });
+    } else if (/^(placeholder|tbd|undefined|null|\[.*\]|heading\s*\d*)$/i.test(h.text)) {
+      emptyOrPlaceholder.push({ text: h.text, level: h.level, reason: 'Contains placeholder marker' });
+    }
+  }
+
+  // Count how many H2 sections contain at least one nested H3 heading
+  let h2WithH3Count = 0;
+  let currentH2HasH3 = false;
+  for (const h of headings) {
+    if (h.level === 2) {
+      if (currentH2HasH3) h2WithH3Count++;
+      currentH2HasH3 = false;
+    } else if (h.level === 3) {
+      currentH2HasH3 = true;
+    }
+  }
+  if (currentH2HasH3) h2WithH3Count++;
+
+  const isHierarchyClean =
+    h1Headings.length === 1 &&
+    h2Headings.length >= 4 &&
+    invalidJumps.length === 0 &&
+    emptyOrPlaceholder.length === 0;
+
+  return {
+    headings,
+    h1Headings,
+    h2Headings,
+    h3Headings,
+    h4PlusHeadings,
+    h1Count: h1Headings.length,
+    h2Count: h2Headings.length,
+    h3Count: h3Headings.length,
+    h4PlusCount: h4PlusHeadings.length,
+    h2WithH3Count,
+    invalidJumps,
+    emptyOrPlaceholder,
+    isHierarchyClean
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Unsupported-Claim Scan Patterns & Scanner (Rule R9)
+// -----------------------------------------------------------------------------
+export interface ClaimPatternDef {
+  regex: RegExp;
+  category: string;
+  reason: string;
+}
+
+export const CLAIM_PATTERNS: ClaimPatternDef[] = [
+  {
+    regex: /\b\d+(\.\d+)?%/i,
+    category: 'Percentage Metric',
+    reason: 'Contains an unverified percentage statistic that requires empirical source attribution.'
+  },
+  {
+    regex: /\b(studies\s+show|research\s+shows|according\s+to\s+studies|scientists\s+found|proven\s+by\s+research)\b/i,
+    category: 'Unattributed Research',
+    reason: 'Cites scientific studies or research without providing a verifiable publication or author citation.'
+  },
+  {
+    regex: /\b\d+\s*(million|billion|thousand)\s+(users|people|customers|queries|dollars|pounds|euros)\b/i,
+    category: 'Unverified Statistic',
+    reason: 'Cites a large numerical volume claim without primary data verification.'
+  },
+  {
+    regex: /\b(ranked\s+(#1|number\s*1|first)|#1\s+rated|best\s+in\s+the\s+world|industry-leading)\b/i,
+    category: 'Unverified Ranking',
+    reason: 'Makes an absolute ranking or supremacy assertion without an audited benchmarking source.'
+  },
+  {
+    regex: /\b(guaranteed\s+(results|success|traffic|rankings)|100%\s+guaranteed|risk-free|fail-safe)\b/i,
+    category: 'Guaranteed Outcome',
+    reason: 'Promises guaranteed outcomes or zero risk, which violates objective SEO editorial guidelines.'
+  },
+  {
+    regex: /\b\d{3,}\s*(searches|monthly\s+searches|search\s+volume)\b/i,
+    category: 'Fabricated Volume Metric',
+    reason: 'States specific numerical search volumes without integration to an authenticated keyword API.'
+  }
 ];
 
-export function findUnsupportedClaims(text: string, language: string = 'English'): Array<{ sentence: string; matchedPattern: string }> {
+export interface ClaimFlag {
+  sentence: string;
+  category: string;
+  reason: string;
+  matchedPattern: string;
+}
+
+export function findUnsupportedClaims(text: string, language: string = 'English'): ClaimFlag[] {
   const sentences = splitSentences(text);
-  const flags: Array<{ sentence: string; matchedPattern: string }> = [];
+  const flags: ClaimFlag[] = [];
 
   const patterns = language === 'English'
-    ? UNSUPPORTED_PATTERNS
-    : [/\b\d+(\.\d+)?%/]; // For non-English only the percentage pattern is applied per R9
+    ? CLAIM_PATTERNS
+    : [CLAIM_PATTERNS[0]]; // For non-English languages, only percentage pattern applies per Section E7
 
   for (const sentence of sentences) {
-    for (const pattern of patterns) {
-      if (pattern.test(sentence)) {
+    for (const def of patterns) {
+      if (def.regex.test(sentence)) {
         flags.push({
           sentence,
-          matchedPattern: pattern.source
+          category: def.category,
+          reason: def.reason,
+          matchedPattern: def.regex.source
         });
         break; // Only flag each sentence once
       }

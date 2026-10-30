@@ -14,6 +14,7 @@ import {
   Code2
 } from 'lucide-react';
 import { useStore } from '../state/store';
+import { countWords } from '../lib/text';
 
 export const Dashboard: React.FC = () => {
   const { state, loadExampleInput } = useStore();
@@ -122,9 +123,9 @@ export const Dashboard: React.FC = () => {
                   </span>
                 </div>
                 <div className="run-metric-row">
-                  <span className="metric-label">Target Word Count:</span>
-                  <span className="metric-value">
-                    {state.currentPackage.input.wordCount} words
+                  <span className="metric-label">Article Word Count:</span>
+                  <span className="metric-value font-mono">
+                    {countWords(state.currentPackage.articleMarkdown || '')} / {state.currentPackage.input.wordCount} words
                   </span>
                 </div>
                 {state.currentPackage.evaluation && (

@@ -107,6 +107,9 @@ export async function callProviderWithJsonValidation<T>(
   );
 }
 
+import { countWords } from './text.js';
+import { calibrateArticleWordCount } from './articleGenerator.js';
+
 export interface MarkdownCallResult {
   text: string;
   attempts: number;
@@ -121,7 +124,8 @@ export async function callProviderWithMarkdownValidation(
   req: LlmRequest,
   expectedH1: string,
   stageName: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  targetWords?: number
 ): Promise<MarkdownCallResult> {
   let attempts = 1;
   const initialResult = await provider.generate(req, signal);
@@ -142,13 +146,27 @@ export async function callProviderWithMarkdownValidation(
     if (h2Count < 4) {
       return { valid: false, reason: `Article must contain at least 4 H2 headings (found ${h2Count}).` };
     }
+    if (targetWords) {
+      const words = countWords(text);
+      const diffPct = Math.abs(words - targetWords) / targetWords;
+      if (diffPct > 0.25) {
+        return {
+          valid: false,
+          reason: `Article word count is ${words} words, which differs significantly from target of ${targetWords} words (must be within 10% tolerance).`
+        };
+      }
+    }
     return { valid: true };
   };
 
   const firstCheck = validateMarkdown(initialResult.text);
   if (firstCheck.valid) {
+    let finalOutput = initialResult.text.trim();
+    if (targetWords) {
+      finalOutput = calibrateArticleWordCount(finalOutput, targetWords);
+    }
     return {
-      text: initialResult.text.trim(),
+      text: finalOutput,
       attempts: 1,
       usage: { inputTokens: totalInputTokens, outputTokens: totalOutputTokens }
     };
@@ -159,7 +177,7 @@ export async function callProviderWithMarkdownValidation(
   const retryUserPrompt = `Your previous article output failed validation.
 Problem: ${firstCheck.reason}
 H1 must start with: # ${expectedH1}
-Provide the complete, corrected article in Markdown matching all original constraints.`;
+${targetWords ? `Target word count: exactly around ${targetWords} words (within 10% tolerance, between ${Math.round(targetWords * 0.9)} and ${Math.round(targetWords * 1.1)} words).\n` : ''}Provide the complete, corrected article in Markdown matching all original constraints.`;
 
   const retryReq: LlmRequest = {
     system: req.system,
@@ -174,8 +192,12 @@ Provide the complete, corrected article in Markdown matching all original constr
 
   const secondCheck = validateMarkdown(retryResult.text);
   if (secondCheck.valid) {
+    let finalOutput = retryResult.text.trim();
+    if (targetWords) {
+      finalOutput = calibrateArticleWordCount(finalOutput, targetWords);
+    }
     return {
-      text: retryResult.text.trim(),
+      text: finalOutput,
       attempts: 2,
       usage: { inputTokens: totalInputTokens, outputTokens: totalOutputTokens }
     };

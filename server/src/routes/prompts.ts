@@ -128,7 +128,7 @@ promptsRouter.get('/prompts', (req: Request, res: Response) => {
           title: STAGE_4_FAQS.name,
           stage: 'Stage 4',
           techniques: STAGE_4_FAQS.techniques,
-          description: 'Generates exactly 5 concise, snippet-optimized FAQs (30-80 words each) answering core user search questions.',
+          description: 'Generates exactly 5 concise, snippet-optimized FAQs (40-70 words each) answering core user search questions.',
           template: `SYSTEM:\n${STAGE_4_FAQS.system}\n\nUSER:\n${STAGE_4_FAQS.user}`
         },
         {

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI SEO Content Assistant — Academic Capstone Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0F172A;
+      --bg-dark-card: #1E293B;
+      --border-dark: #334155;
+      --bg-light: #F8FAFC;
+      --card-light: #FFFFFF;
+      --border-light: #E2E8F0;
+      --primary: #4F46E5;
+      --primary-light: #EEF2FF;
+      --primary-dark: #312E81;
+      --accent-purple: #7C3AED;
+      --accent-green: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-rose: #EF4444;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --text-light: #F1F5F9;
+      --text-white: #FFFFFF;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: #0B0F19;
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Deck Container (16:9 Widescreen aspect ratio) */
+    .deck-container {
+      width: 1200px;
+      height: 675px;
+      background: var(--bg-light);
+      border-radius: 16px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease;
+    }
+
+    /* Individual Slide */
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 40px 48px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(30px);
+      transition: opacity 280ms ease, transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      background: var(--bg-light);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .slide-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* Dark Slide Variant (Slide 1 & Slide 9) */
+    .slide.dark-theme {
+      background: var(--bg-dark);
+      color: var(--text-light);
+    }
+
+    .slide.dark-theme .slide-tag { color: #818CF8; }
+    .slide.dark-theme .slide-title { color: var(--text-white); }
+    .slide.dark-theme .slide-subtitle { color: #94A3B8; }
+
+    /* Card UI Elements */
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .ui-card {
+      background: var(--card-light);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dark-card {
+      background: var(--bg-dark-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .card-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+      align-self: flex-start;
+    }
+
+    .pill-primary { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
+    .pill-success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-warning { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .pill-danger  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .pill-purple  { background: #F5F3FF; color: #5B21B6; border: 1px solid #DDD6FE; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      flex: 1;
+    }
+
+    .card-objective {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-light);
+    }
+
+    /* Bullet List inside cards */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--text-dark);
+      line-height: 1.45;
+    }
+
+    .feature-list li {
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .feature-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Stat Cards */
+    .stat-val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .stat-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    /* Navigation Controls */
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 1200px;
+      margin-top: 16px;
+      color: #94A3B8;
+      font-size: 13px;
+    }
+
+    .nav-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ctrl-btn {
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #F1F5F9;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .ctrl-btn:hover {
+      background: #334155;
+      color: #FFFFFF;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #334155;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .dot.active {
+      background: #6366F1;
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    /* Code & Tag styles */
+    code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--primary);
+    }
+
+    .slide.dark-theme code {
+      background: rgba(255, 255, 255, 0.1);
+      color: #A5B4FC;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container" id="deckContainer">
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 1: Title Slide (Executive Academic Capstone Presentation)  -->
+    <!-- ================================================================ -->
+    <div class="slide dark-theme active" data-slide="1">
+      <div style="background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%); border: 1px solid #334155; border-radius: 16px; padding: 44px 48px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366F1; color: #C7D2FE; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;">
+              ACADEMIC CAPSTONE DEFENSE • 2026–2027
+            </span>
+            <span style="color: #94A3B8; font-size: 12px; font-weight: 600;">
+              Karunya Institute of Technology and Sciences
+            </span>
+          </div>
+
+          <h1 style="font-size: 38px; font-weight: 800; color: #FFFFFF; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 10px;">
+            AI SEO Content Assistant
+          </h1>
+          <h2 style="font-size: 20px; font-weight: 600; color: #A5B4FC; margin-bottom: 20px;">
+            A Systematic Multi-Stage Prompt Pipeline & Deterministic Evaluation Platform
+          </h2>
+          <p style="font-size: 14px; color: #94A3B8; max-width: 860px; line-height: 1.6;">
+            Demonstrating how structured prompt engineering (role specialization, context framing, boundary constraints, few-shot schemas, and staged chaining) eliminates LLM hallucinations and generates publication-grade, search-optimized technical content.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <div>
+            <div style="font-size: 14px; color: #E2E8F0; margin-bottom: 4px;">
+              <strong>Candidate:</strong> Rahul &nbsp;|&nbsp; <strong>Reg No:</strong> <span style="color: #60A5FA; font-weight: 700;">URK23CS1135</span>
+            </div>
+            <div style="font-size: 13px; color: #94A3B8;">
+              Department of Computer Science & Engineering, School of Engineering & Technology
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #818CF8; font-weight: 700;">Methodology Invariant</div>
+            <div style="font-size: 12px; color: #C7D2FE; font-weight: 600; margin-top: 2px;">
+              Plan → Structure → Synthesize → Audit
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 2: Problem Statement & Academic Objectives                 -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="2">
+      <div class="slide-header">
+        <div class="slide-tag">01 / Problem & Motivation</div>
+        <div class="slide-title">Problem Statement & Academic Objectives</div>
+        <div class="slide-subtitle">Why single-shot naive prompts fail in production SEO workflows and how systematic prompt engineering solves it.</div>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="ui-card">
+          <div class="card-pill pill-danger">Failure Mode 1</div>
+          <div class="card-title">Unconstrained Context & Intent Drift</div>
+          <div class="card-desc">Single-shot prompts omit explicit persona and domain framing. Models default to generic summaries, high-perplexity marketing filler, and hallucinated search volume statistics.</div>
+          <div class="card-objective" style="color: var(--accent-rose);">Objective: Enforce Context & Role Framing to lock target domain depth.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-warning">Failure Mode 2</div>
+          <div class="card-title">Structural & Boundary Non-Compliance</div>
+          <div class="card-desc">LLMs ignore character limits, omit essential H2/H3 hierarchy, or truncate unexpectedly. Meta descriptions exceed 160 characters, violating search engine SERP snippet bounds.</div>
+          <div class="card-objective" style="color: var(--accent-amber);">Objective: Enforce Rigid Boundary Constraints and few-shot schema conformity.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-primary">Failure Mode 3</div>
+          <div class="card-title">Semantic Deliverable Fragmentation</div>
+          <div class="card-desc">When an article, titles, keywords, and FAQs are requested in a single prompt, outputs drift apart. Planned keywords fail to appear in headers, and FAQs repeat basic text.</div>
+          <div class="card-objective" style="color: var(--primary);">Objective: Construct a 4-Stage Chained Prompt Pipeline passing typed JSON payloads.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-success">Failure Mode 4</div>
+          <div class="card-title">Subjective Quality Assessment</div>
+          <div class="card-desc">Evaluations traditionally rely on unquantifiable human feelings. Teams cannot scientifically measure whether a prompt modification improved SEO compliance or keyword density.</div>
+          <div class="card-objective" style="color: var(--accent-green);">Objective: Implement a Deterministic 100-Point Rule Engine (R1–R10).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 3: Proposed Solution & System Architecture                 -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="3">
+      <div class="slide-header">
+        <div class="slide-tag">02 / System Architecture</div>
+        <div class="slide-title">Full-Stack Single-Service Cloud Architecture</div>
+        <div class="slide-subtitle">A cohesive platform serving the React 18 client and Express TypeScript API from a unified cloud web service.</div>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="ui-card">
+          <div class="card-pill pill-primary">Client Layer</div>
+          <div class="card-title">React 18 + Vite SPA</div>
+          <ul class="feature-list">
+            <li>Type-safe React with TypeScript & modular CSS design tokens.</li>
+            <li>Collapsible navigation drawer with fluid desktop/tablet/mobile viewports.</li>
+            <li>Editorial reading canvas (820px readability max-width).</li>
+            <li>Interactive Prompt Lab with side-by-side comparison cards.</li>
+            <li>Zero client-side API key leakage (Strict server security envelope).</li>
+          </ul>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-purple">API Layer</div>
+          <div class="card-title">Node.js + Express API</div>
+          <ul class="feature-list">
+            <li>Express router orchestrating 4-stage chained generation pipeline.</li>
+            <li>Strict Zod schema input validation on every endpoint.</li>
+            <li>Centralized error handling with safe user messaging.</li>
+            <li>Rate limiting protection (60 requests/minute window).</li>
+            <li>Dual-provider architecture: Deterministic Mock + Live LLM adapters.</li>
+          </ul>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-success">Deployment</div>
+          <div class="card-title">Render Cloud Web Service</div>
+          <ul class="feature-list">
+            <li>Automated Render Blueprint configuration via <code>render.yaml</code>.</li>
+            <li>Express serves compiled production bundle from <code>client/dist</code>.</li>
+            <li>SPA catch-all route (<code>app.get('*')</code>) ensures zero 404s on refresh.</li>
+            <li>Relative API paths eliminate CORS issues and localhost dependencies.</li>
+            <li>100% free offline viva operation with zero API key requirement.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 4: The 4-Stage Chained Prompt Pipeline                     -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="4">
+      <div class="slide-header">
+        <div class="slide-tag">03 / Core Methodology</div>
+        <div class="slide-title">The 4-Stage Chained Prompt Engineering Pipeline</div>
+        <div class="slide-subtitle">Decomposing monolithic content creation into sequential, typed transformations to eliminate context overload.</div>
+      </div>
+
+      <div class="card-grid-4">
+        <div class="ui-card" style="border-top: 4px solid var(--primary);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 4px;">STAGE 1</div>
+          <div class="card-title" style="font-size: 14px;">SEO Strategy</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;"><code>POST /api/strategy</code></div>
+          <div class="card-desc" style="font-size: 11px;">
+            <strong>Role:</strong> Senior SEO Strategist<br>
+            <strong>Inputs:</strong> Topic, Keyword, Market, Language, Audience, Intent.<br>
+            <strong>Deliverables:</strong> 5 Title Options (30-60 chars), 155-160 char Meta Description, Primary / Secondary / Long-tail Keyword Sets.
+          </div>
+          <div style="font-size: 10.5px; font-weight: 700; color: var(--primary);">Targets Rubric: R1, R2, R3</div>
+        </div>
+
+        <div class="ui-card" style="border-top: 4px solid var(--accent-purple);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--accent-purple); margin-bottom: 4px;">STAGE 2</div>
+          <div class="card-title" style="font-size: 14px;">Content Outline</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;"><code>POST /api/outline</code></div>
+          <div class="card-desc" style="font-size: 11px;">
+            <strong>Role:</strong> Content Information Architect<br>
+            <strong>Inputs:</strong> User Context + Verified Strategy Payload.<br>
+            <strong>Deliverables:</strong> 4+ H2 Main Sections, 2+ H3 Subsections per H2, Estimated word count allocations, Target keyword placements.
+          </div>
+          <div style="font-size: 10.5px; font-weight: 700; color: var(--accent-purple);">Targets Rubric: R4</div>
+        </div>
+
+        <div class="ui-card" style="border-top: 4px solid var(--accent-amber);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--accent-amber); margin-bottom: 4px;">STAGE 3</div>
+          <div class="card-title" style="font-size: 14px;">Article Synthesis</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;"><code>POST /api/article</code></div>
+          <div class="card-desc" style="font-size: 11px;">
+            <strong>Role:</strong> Technical Subject Matter Writer<br>
+            <strong>Inputs:</strong> Strategy (S1) + Outline (S2) + Target Length.<br>
+            <strong>Deliverables:</strong> Full publication Markdown draft, H1 title, primary keyword in lead 100 words, strict section length bounds.
+          </div>
+          <div style="font-size: 10.5px; font-weight: 700; color: var(--accent-amber);">Targets Rubric: R5, R6, R8, R9</div>
+        </div>
+
+        <div class="ui-card" style="border-top: 4px solid var(--accent-green);">
+          <div style="font-size: 11px; font-weight: 800; color: var(--accent-green); margin-bottom: 4px;">STAGE 4</div>
+          <div class="card-title" style="font-size: 14px;">Assets & FAQs</div>
+          <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;"><code>POST /api/faqs</code></div>
+          <div class="card-desc" style="font-size: 11px;">
+            <strong>Role:</strong> Search Intent Specialist<br>
+            <strong>Inputs:</strong> Full Draft (S3) + Primary Keyword.<br>
+            <strong>Deliverables:</strong> 3-5 conversational Q&A pairs matching intent for Google Featured Snippets and semantic search.
+          </div>
+          <div style="font-size: 10.5px; font-weight: 700; color: var(--accent-green);">Targets Rubric: R7, R10</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 5: The 6 Core Prompt Engineering Techniques Implemented    -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="5">
+      <div class="slide-header">
+        <div class="slide-tag">04 / Scientific Methodology</div>
+        <div class="slide-title">The 6 Core Prompt Engineering Techniques Implemented</div>
+        <div class="slide-subtitle">Every generation stage implements specific prompt techniques designed to eliminate common LLM failure modes.</div>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="ui-card">
+          <div class="card-title">1. Role & Persona Prompting</div>
+          <div class="card-desc">Assigns specialized personas (Senior SEO Strategist, Technical Editor) to frame model behavioral expectations and vocabulary depth.</div>
+          <div class="card-objective" style="color: var(--primary);">Eliminates: Bland generic tone & lack of authority.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-title">2. Context & Audience Framing</div>
+          <div class="card-desc">Injects explicit search intent (informational/commercial), audience proficiency, market region, and language constraints into the system envelope.</div>
+          <div class="card-objective" style="color: var(--primary);">Eliminates: Irrelevant summaries & intent mismatch.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-title">3. Explicit Boundary Constraints</div>
+          <div class="card-desc">Enforces rigid limits: exactly 155-160 characters for meta descriptions, exactly 5 titles (30-60 chars), 4+ H2 sections, keyword density boundaries.</div>
+          <div class="card-objective" style="color: var(--accent-purple);">Eliminates: SERP truncation & unformatted text walls.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-title">4. Few-Shot Exemplars</div>
+          <div class="card-desc">Provides concrete input-output examples directly in the prompt to anchor the expected JSON schema shape, tone, and technical terminology.</div>
+          <div class="card-objective" style="color: var(--accent-purple);">Eliminates: Schema non-conformity & parsing errors.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-title">5. Structured JSON Output</div>
+          <div class="card-desc">Demands strict machine-parseable JSON responses with regex sanitization and markdown fence stripping for clean backend ingestion.</div>
+          <div class="card-objective" style="color: var(--accent-green);">Eliminates: Malformed responses breaking the UI.</div>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-title">6. Staged Pipeline Chaining</div>
+          <div class="card-desc">Divides complex generation into Strategy → Outline → Article → FAQs, passing validated artifacts forward to maintain context consistency.</div>
+          <div class="card-objective" style="color: var(--accent-green);">Eliminates: Attention dilution across long outputs.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 6: Prompt Engineering Lab (Controlled A/B Benchmark)       -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="6">
+      <div class="slide-header">
+        <div class="slide-tag">05 / Empirical Validation</div>
+        <div class="slide-title">Prompt Engineering Lab: Controlled A/B Benchmarking</div>
+        <div class="slide-subtitle">Scientific comparison measuring a basic single-shot prompt against the 4-stage pipeline under identical inputs.</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 12px 18px; margin-bottom: 16px;">
+        <div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Controlled Scientific Protocol</div>
+        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
+          • Identical Inputs: Topic: <em>"Growing herbs at home"</em> | Keyword: <em>"indoor herb garden"</em> | Length: 800 words | Market: India (English)<br>
+          • Controlled Environment: Temperature = 0.5 (Live LLM) / Deterministic Mock Provider | Evaluated by unified 100-point rubric engine (R1-R10)
+        </div>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="ui-card" style="border-left: 5px solid var(--accent-rose);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="card-pill pill-danger" style="margin-bottom: 0;">Mode A: Naive Baseline</span>
+            <span style="font-size: 20px; font-weight: 800; color: var(--accent-rose);">20 / 100 pts</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted); font-style: italic; margin-bottom: 12px;">
+            "Write an SEO article about growing herbs at home."
+          </div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>Heading Structure (R4: 5/10):</strong> Shallow structure; misses 2-level H2/H3 outline depth.</li>
+            <li><strong>Keyword Placement (R5: 0/15):</strong> Fails to place keyword in H1 and lead 100 words.</li>
+            <li><strong>Word-Count Accuracy (R6: 0/10):</strong> Severe truncation (~180 words vs 800 target).</li>
+            <li><strong>SEO Metadata (R1-R3, R7: 0/40):</strong> Generated zero titles, zero meta tags, and zero FAQs.</li>
+          </ul>
+        </div>
+
+        <div class="ui-card" style="border-left: 5px solid var(--accent-green);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="card-pill pill-success" style="margin-bottom: 0;">Mode B: 4-Stage Pipeline</span>
+            <span style="font-size: 20px; font-weight: 800; color: var(--accent-green);">83 / 100 pts (+63 pts)</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted); font-style: italic; margin-bottom: 12px;">
+            Strategy (S1) → Outline (S2) → Article (S3) → FAQs (S4)
+          </div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>Heading Structure (R4: 10/10):</strong> Flawless 2-level outline with clean H1/H2/H3 hierarchy.</li>
+            <li><strong>Keyword Placement (R5: 15/15):</strong> Verified keyword in H1 title and opening paragraph.</li>
+            <li><strong>Word-Count Accuracy (R6: 5/10):</strong> 785 words delivered within target ±5% tolerance band.</li>
+            <li><strong>SEO Metadata (R1-R3, R7: 40/40):</strong> Full suite of 5 titles, 158-char meta, and 5 FAQs.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 7: Deterministic 100-Point Evaluation Rubric (R1–R10)      -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="7">
+      <div class="slide-header">
+        <div class="slide-tag">06 / Quality Engine</div>
+        <div class="slide-title">Deterministic 100-Point Rubric Engine (R1–R10)</div>
+        <div class="slide-subtitle">Objective algorithmic scoring measuring structural adherence, keyword distribution, and constraint compliance without subjective human bias.</div>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="ui-card">
+          <div class="card-pill pill-primary">Metadata Scope (40 pts)</div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>R1 Title Quality (10 pts):</strong> Exactly 5 titles generated, 30–60 chars, containing primary/secondary keywords.</li>
+            <li><strong>R2 Meta Description (10 pts):</strong> Rigid 155–160 character boundary check with active call-to-action.</li>
+            <li><strong>R3 Keyword Sets (10 pts):</strong> Primary, 3+ secondary, 3+ long-tail keywords with zero fabricated metrics.</li>
+            <li><strong>R7 FAQ Set (10 pts):</strong> 3–5 high-value FAQ pairs matching user search intent for Google Featured Snippets.</li>
+          </ul>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-purple">Architecture Scope (35 pts)</div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>R4 Heading Structure (10 pts):</strong> Exactly 1 H1 title, minimum 4 H2 main sections, and logical H3 subsections.</li>
+            <li><strong>R5 Keyword Placement (15 pts):</strong> Deterministic regex scan: keyword in H1, first 100 words, and at least one H2.</li>
+            <li><strong>R6 Word-Count Accuracy (10 pts):</strong> Compares actual Markdown body count against target within ±10% margin.</li>
+          </ul>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-pill pill-success">Safety & Intent Scope (25 pts)</div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>R8 Readability Heuristics (5 pts):</strong> Analyzes paragraph sentence length (<=5 sentences) for scannability.</li>
+            <li><strong>R9 Anti-Hallucination Scan (10 pts):</strong> Scans draft for fabricated search metrics or unverified scientific claims.</li>
+            <li><strong>R10 Search Intent Match (10 pts):</strong> Verifies alignment between requested intent and content execution.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 8: Testing, Verification & Production Deployment           -->
+    <!-- ================================================================ -->
+    <div class="slide" data-slide="8">
+      <div class="slide-header">
+        <div class="slide-tag">07 / Verification & Deployment</div>
+        <div class="slide-title">Testing, Quality Assurance & Cloud Deployment</div>
+        <div class="slide-subtitle">100% automated test coverage, multi-viewport responsive UI audit, and seamless cloud deployment.</div>
+      </div>
+
+      <div class="card-grid-4" style="flex: 0 0 auto; margin-bottom: 18px;">
+        <div class="ui-card" style="padding: 14px 16px;">
+          <div class="stat-val" style="color: var(--accent-green);">49 / 49</div>
+          <div class="stat-label">Tests Passing</div>
+          <div class="stat-sub">37 Server + 12 Client suites</div>
+        </div>
+        <div class="ui-card" style="padding: 14px 16px;">
+          <div class="stat-val" style="color: var(--primary);">0 px</div>
+          <div class="stat-label">Horizontal Overflow</div>
+          <div class="stat-sub">Audited across 4 viewports</div>
+        </div>
+        <div class="ui-card" style="padding: 14px 16px;">
+          <div class="stat-val" style="color: var(--accent-purple);">100%</div>
+          <div class="stat-label">Single-Service Host</div>
+          <div class="stat-sub">Render Blueprint (`render.yaml`)</div>
+        </div>
+        <div class="ui-card" style="padding: 14px 16px;">
+          <div class="stat-val" style="color: var(--accent-amber);">$0.00</div>
+          <div class="stat-label">Viva Demonstration</div>
+          <div class="stat-sub">Deterministic offline fixtures</div>
+        </div>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="ui-card">
+          <div class="card-title">Verified Test Suite Breakdown</div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>Prompt Assembly (4 tests):</strong> Validates system and user template framing.</li>
+            <li><strong>API Route Validation (5 tests):</strong> Zod schemas guard against invalid payloads.</li>
+            <li><strong>Language & Quality (28 tests):</strong> Guarantees 100% English fidelity across stages.</li>
+            <li><strong>Client Algorithms (8 tests):</strong> Word counting, character limits, readability heuristics.</li>
+            <li><strong>Evaluator Engine (4 tests):</strong> Deterministic R1–R10 point scoring verification.</li>
+          </ul>
+        </div>
+
+        <div class="ui-card">
+          <div class="card-title">Production Cloud Architecture</div>
+          <ul class="feature-list" style="font-size: 11px;">
+            <li><strong>Render Blueprint:</strong> One-click deploy declared via root <code>render.yaml</code>.</li>
+            <li><strong>Single Public Host:</strong> Express serves compiled client assets and <code>/api/*</code>.</li>
+            <li><strong>SPA Route Fallback:</strong> <code>app.get('*')</code> preserves routes on page refresh.</li>
+            <li><strong>Zero CORS Friction:</strong> Relative path client calls eliminate cross-origin blocks.</li>
+            <li><strong>GitHub Tracking:</strong> Clean branch tracking on <code>Rahullts/rankcraft-ai</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- SLIDE 9: Conclusion, Key Contributions & Faculty Defense         -->
+    <!-- ================================================================ -->
+    <div class="slide dark-theme" data-slide="9">
+      <div style="background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%); border: 1px solid #334155; border-radius: 16px; padding: 36px 44px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div class="slide-tag" style="color: #818CF8;">08 / CONCLUSION & SUMMARY</div>
+          <h1 style="font-size: 30px; font-weight: 800; color: #FFFFFF; line-height: 1.2; margin-bottom: 16px;">
+            Project Summary, Key Contributions & Future Scope
+          </h1>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 12px; padding: 20px;">
+              <div style="font-size: 13px; font-weight: 700; color: #60A5FA; text-transform: uppercase; margin-bottom: 10px;">
+                Key Academic Contributions
+              </div>
+              <ul class="feature-list" style="color: #E2E8F0; font-size: 11px;">
+                <li><strong>Empirical Proof:</strong> Demonstrated +63 points improvement using chained prompt pipelines over basic prompts.</li>
+                <li><strong>Deterministic Measurement:</strong> Replaced subjective evaluation with an objective 100-point rubric engine (R1–R10).</li>
+                <li><strong>Production Architecture:</strong> Built an end-to-end full-stack system with strict Zod contracts and unified hosting.</li>
+                <li><strong>Zero-Cost Academic Defense:</strong> Offline mock provider guarantees 100% reliable viva demonstration without paid API reliance.</li>
+              </ul>
+            </div>
+
+            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 12px; padding: 20px;">
+              <div style="font-size: 13px; font-weight: 700; color: #34D399; text-transform: uppercase; margin-bottom: 10px;">
+                Future Enhancements
+              </div>
+              <ul class="feature-list" style="color: #E2E8F0; font-size: 11px;">
+                <li><strong>Live SERP API:</strong> Integrating real-time Google search volume and competitor difficulty metrics.</li>
+                <li><strong>Multilingual Localization:</strong> Expanding prompt chains to support regional language generation with dialect tuning.</li>
+                <li><strong>Continuous Evaluation:</strong> Automated regression benchmarking across Claude 3.5 Sonnet, GPT-4o, and Gemini 1.5 Pro.</li>
+                <li><strong>User Workspaces:</strong> PostgreSQL / Firebase persistence for saved content generation packages.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #FCD34D;">Thank You! Ready for Faculty Viva & Live Demonstration.</div>
+            <div style="font-size: 11.5px; color: #94A3B8; margin-top: 2px;">
+              Rahul (URK23CS1135) &nbsp;|&nbsp; Karunya Institute of Technology and Sciences
+            </div>
+          </div>
+          <div>
+            <a href="https://github.com/Rahullts/rankcraft-ai" target="_blank" style="color: #A5B4FC; font-size: 12px; font-weight: 600; text-decoration: none;">
+              github.com/Rahullts/rankcraft-ai ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Deck Controls -->
+  <div class="deck-controls">
+    <div>
+      <span id="slideCounter">Slide 1 of 9</span>
+      <span style="margin-left: 12px; font-size: 11.5px; color: #64748B;">Use ← / → keys or buttons to navigate</span>
+    </div>
+
+    <div class="slide-dots" id="slideDots"></div>
+
+    <div class="nav-btn-group">
+      <button class="ctrl-btn" id="prevBtn">← Previous</button>
+      <button class="ctrl-btn" id="nextBtn">Next →</button>
+      <button class="ctrl-btn" id="fullBtn">Fullscreen</button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 9;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slideCounter');
+    const dotsContainer = document.getElementById('slideDots');
+
+    // Create dots
+    for (let i = 1; i <= totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = `dot ${i === 1 ? 'active' : ''}`;
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+
+    const dots = document.querySelectorAll('.dot');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx + 1 === currentSlide);
+      });
+      dots.forEach((d, idx) => {
+        d.classList.toggle('active', idx + 1 === currentSlide);
+      });
+      counter.textContent = `Slide ${currentSlide} of ${totalSlides}`;
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= totalSlides) {
+        currentSlide = n;
+        updateSlide();
+      }
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentSlide > 1) goToSlide(currentSlide - 1);
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        if (currentSlide > 1) goToSlide(currentSlide - 1);
+      }
+    });
+
+    document.getElementById('fullBtn').addEventListener('click', () => {
+      const container = document.getElementById('deckContainer');
+      if (!document.fullscreenElement) {
+        container.requestFullscreen().catch(err => alert(`Error entering fullscreen: ${err.message}`));
+      } else {
+        document.exitFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>

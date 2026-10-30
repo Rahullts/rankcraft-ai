@@ -98,6 +98,9 @@ export const Generate: React.FC = () => {
   const currentPkg = state.currentPackage;
   const metaLength = currentPkg?.strategy?.metaDescription ? currentPkg.strategy.metaDescription.length : 0;
   const isMetaLengthValid = metaLength >= 155 && metaLength <= 160;
+  const isTargetChanged = Boolean(
+    currentPkg && state.input.wordCount && currentPkg.input.wordCount && state.input.wordCount !== currentPkg.input.wordCount
+  );
 
   return (
     <div className="generate-page">
@@ -385,11 +388,19 @@ export const Generate: React.FC = () => {
       {/* Generated Content Showcase */}
       {currentPkg && (
         <section className="results-container">
+          {isTargetChanged && (
+            <div className="stale-warning-banner" role="status">
+              <AlertCircle size={18} className="flex-shrink-0" />
+              <div>
+                <strong>Notice: Target word count changed in form ({state.input.wordCount} words).</strong> Currently displaying the package generated for <strong>{currentPkg.input.wordCount} words</strong> ({countWords(currentPkg.articleMarkdown || '')} words generated). Click <strong>"Generate SEO Package"</strong> above to regenerate for your new target.
+              </div>
+            </div>
+          )}
           <div className="results-header">
             <div className="results-title-group">
               <h3 className="results-title">Generated SEO Content Package</h3>
               <span className="results-meta">
-                Generated in {((currentPkg.meta.totalDurationMs || 0) / 1000).toFixed(1)}s · {currentPkg.meta.isMock ? 'Mock Provider (Offline Fixtures)' : 'Live LLM Provider'}
+                Target: {currentPkg.input.wordCount} words ({countWords(currentPkg.articleMarkdown || '')} words generated) · Generated in {((currentPkg.meta.totalDurationMs || 0) / 1000).toFixed(1)}s · {currentPkg.meta.isMock ? 'Mock Provider (Offline Fixtures)' : 'Live LLM Provider'}
               </span>
             </div>
 
@@ -700,7 +711,7 @@ export const Generate: React.FC = () => {
                       <div className="article-stats">
                         <span className="stat-pill">
                           <FileText size={14} />
-                          <span>{countWords(currentPkg.articleMarkdown || '')} words</span>
+                          <span>{countWords(currentPkg.articleMarkdown || '')} / {currentPkg.input.wordCount} words</span>
                         </span>
                         <span className="stat-pill">
                           <Clock size={14} />
@@ -738,7 +749,12 @@ export const Generate: React.FC = () => {
                       <div className="meta-kpi-row mb-3">
                         <div className="meta-kpi-item">
                           <span className="meta-kpi-label">Word Target</span>
-                          <span className="meta-kpi-val">{countWords(currentPkg.articleMarkdown || '')} / {currentPkg.input.wordCount}</span>
+                          <span className="meta-kpi-val">{countWords(currentPkg.articleMarkdown || '')} / {currentPkg.input.wordCount} words</span>
+                          {isTargetChanged && (
+                            <span style={{ fontSize: '0.72rem', color: '#B45309', marginTop: '2px', display: 'block', fontWeight: 500 }}>
+                              Form: {state.input.wordCount}w (re-run needed)
+                            </span>
+                          )}
                         </div>
                         <div className="meta-kpi-item">
                           <span className="meta-kpi-label">Rubric Score</span>
@@ -783,7 +799,7 @@ export const Generate: React.FC = () => {
               <div className="card">
                 <div className="card-header">
                   <h4 className="card-title">Frequently Asked Questions (Schema Ready)</h4>
-                  <span className="text-muted text-sm">5 questions with 30-80 word answers</span>
+                  <span className="text-muted text-sm">5 questions with 40-70 word answers</span>
                 </div>
                 <div className="card-body">
                   <div className="faqs-list">

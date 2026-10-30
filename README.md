@@ -62,18 +62,18 @@ The cornerstone academic feature is the **Prompt Engineering Lab (A/B Test)**, w
 
 ## 🎯 The 100-Point Evaluation Rubric (R1 - R10)
 
-Scores are computed **deterministically** via local code (character counting, regex pattern matching, heading tree parsing) rather than subjective LLM evaluation:
+Scores combine **90 automated points (R1–R9)** calculated deterministically via local programmatic checks (character counting, regex boundary analysis, heading tree hierarchy parsing) with **10 human reviewer qualitative assessment points (R10)**:
 
-- **R1: Title Quality (10 pts)** — 5 titles provided, 30-60 character length bounds, keyword inclusion.
-- **R2: Meta Description (10 pts)** — 155-160 exact character SERP target measured by code, keyword present.
-- **R3: Keyword Set (10 pts)** — Primary keyword match, 5-8 secondary keywords, 5-8 long-tail keywords (3+ words).
-- **R4: Heading Structure (10 pts)** — Single H1, 4+ H2 sections, nested H3 subheadings, clean level hierarchy.
+- **R1: Title Quality (10 pts)** — 5 titles provided, 30-60 character length bounds, keyword inclusion, distinct angles.
+- **R2: Meta Description (10 pts)** — 155-160 exact character SERP target measured by code, keyword present, complete sentence.
+- **R3: Keyword Set (10 pts)** — Primary keyword match, 5-8 secondary keywords, 5-8 long-tail keywords (3+ words), duplicate check.
+- **R4: Heading Structure (10 pts)** — Single H1, 4+ H2 sections, nested H3 subheadings, clean level hierarchy without jumps.
 - **R5: Primary Keyword Placement (15 pts)** — Keyword in H1, first 100 words, H2, final section, density within 0.3%-2.5%.
-- **R6: Word-Count Accuracy (10 pts)** — Output length within +/-10% of user target (e.g., 800 words).
-- **R7: FAQs (10 pts)** — Exactly 5 questions, all ending with '?', answers 40-70 words in length.
-- **R8: Readability Heuristic (5 pts)** — Average sentence length <= 20 words (English only).
-- **R9: Unsupported Claim Scan (10 pts)** — Detects unverifiable assertions (percentages, "studies show", "#1 ranked").
-- **R10: Human Evaluator Review (10 pts)** — Interactive 0-5 radio scales for Search Intent Match and Tone & Audience Fit.
+- **R6: Word-Count Accuracy (10 pts)** — Output length within +/-10% of user target (e.g., 500, 800, 1200, 1500 words).
+- **R7: FAQs (10 pts)** — Exactly 5 questions, all ending with '?', answers strictly 40-70 words in length.
+- **R8: Readability Heuristic (5 pts)** — Average sentence length <= 20 words in cleaned prose (English only).
+- **R9: Unsupported Claim Scan (10 pts)** — Detects unverifiable assertions (percentages, "studies show", "#1 ranked", search volume claims).
+- **R10: Human Evaluator Review (10 pts)** — Interactive 0-5 rating scales for Search Intent Match and Tone & Audience Fit.
 
 ---
 
@@ -95,11 +95,11 @@ npm install
 
 ### Step 2: Run Unit Tests
 ```bash
-# Test backend routes, content quality, language consistency, and prompt rendering (37 tests across 4 suites):
+# Test backend routes, content quality, language consistency, word-count targets, and integration (49 tests across 6 suites):
 cd server
 npm test
 
-# Test frontend text utilities and 100-point rubric evaluator (12 tests across 2 suites):
+# Test frontend text utilities, word-count compliance, and 100-point rubric evaluator (27 tests across 3 suites):
 cd ../client
 npm test
 ```

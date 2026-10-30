@@ -71,7 +71,14 @@ export interface PackageRun {
     applicableAutomatedMax: number;
     manualPoints: number;
     totalPoints: number;
-    outlineFidelity?: { matched: number; total: number; percentage: number };
+    isHumanReviewPending?: boolean;
+    outlineFidelity?: {
+      matched: number;
+      total: number;
+      percentage: number;
+      matchedHeadings?: string[];
+      missingHeadings?: string[];
+    };
   };
   manualReview: {
     intentMatch?: number;
@@ -95,6 +102,7 @@ export interface SimpleRun {
     applicableAutomatedMax: number;
     manualPoints: number;
     totalPoints: number;
+    isHumanReviewPending?: boolean;
   };
   manualReview: {
     intentMatch?: number;

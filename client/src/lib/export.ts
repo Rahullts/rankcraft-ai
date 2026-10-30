@@ -1,4 +1,5 @@
 import { PackageRun } from '../state/types';
+import { countWords } from './text';
 
 export function sanitizeSlug(text: string): string {
   return text
@@ -17,7 +18,7 @@ export function formatPackageMarkdown(run: PackageRun): string {
 Generated on ${dateStr} by AI SEO Content Assistant
 Model: ${run.meta.isMock ? 'Mock Provider' : 'Live LLM Provider'}
 Target Market: ${input.market} | Intent: ${input.intent} | Language: ${input.language}
-Target Word Count: ${input.wordCount}
+Target Word Count: ${input.wordCount} words | Actual Word Count: ${countWords(articleMarkdown || '')} words
 
 ---
 

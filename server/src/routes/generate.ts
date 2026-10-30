@@ -246,7 +246,8 @@ generateRouter.post('/article', async (req: Request, res: Response, next) => {
       },
       expectedH1,
       'Article',
-      controller.signal
+      controller.signal,
+      input.wordCount
     ).finally(() => clearTimeout(timeoutId));
 
     const latencyMs = performance.now() - startTime;

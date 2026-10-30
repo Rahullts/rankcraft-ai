@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { evaluate } from '../src/lib/evaluate';
+import { parseMarkdownHeadings } from '../src/lib/text';
 
 describe('Evaluation Engine (Section E - Rules R1-R10)', () => {
   const sampleData = {
@@ -86,23 +87,23 @@ In summary, maintaining an indoor herb garden provides culinary joy and fresh ar
     faqs: [
       {
         question: 'What is the best herb for indoors?',
-        answer: 'Basil, mint, and chives are the easiest varieties for indoor growers. They adapt well to windowsill light conditions, tolerate occasional harvesting mistakes, and provide rapid growth throughout the entire growing season.'
+        answer: 'Basil, mint, chives and parsley are the easiest varieties for indoor beginner growers. They adapt exceptionally well to windowsill light conditions, tolerate occasional pruning mistakes, and provide rapid green growth throughout the entire growing season without requiring complex plant care routines.'
       },
       {
         question: 'How much light do indoor herbs need?',
-        answer: 'Most culinary herbs need at least six hours of direct sunlight daily to thrive. If natural window light is limited during winter months, a standard full-spectrum LED grow light provides adequate supplemental energy.'
+        answer: 'Most culinary herbs need at least six hours of direct sunlight daily to thrive indoors. If natural window light is limited during darker winter months, a standard full-spectrum LED grow light positioned six inches above the foliage provides adequate supplemental energy for steady, healthy growth.'
       },
       {
         question: 'Can I use regular garden soil?',
-        answer: 'Never use regular garden topsoil for indoor containers because it compacts easily and drains poorly. Instead, choose a well-aerated potting mix containing perlite, vermiculite, and peat moss for optimal root aeration.'
+        answer: 'Never use regular outdoor garden topsoil for indoor containers because it compacts easily and drains poorly. Instead, choose a well-aerated potting mix containing perlite, vermiculite, and peat moss to ensure optimal root aeration and prevent moisture-related root rot in small residential pots.'
       },
       {
         question: 'How often should I water my indoor herb garden?',
-        answer: 'Water your indoor herb garden only when the top inch of soil feels dry to the touch. Pour water evenly until it drains through the bottom holes, then discard excess liquid from the saucer.'
+        answer: 'Water your indoor herb garden only when the top inch of soil feels dry to the touch. Pour water evenly across the surface until it drains through the bottom holes, then discard excess pooled liquid from the saucer to prevent dangerous root rot from developing.'
       },
       {
         question: 'When can I harvest the herbs?',
-        answer: 'Begin harvesting once your plants have developed several strong sets of true leaves. Never remove more than one-third of total foliage at once so the plant retains sufficient energy for ongoing development.'
+        answer: 'Begin harvesting once your plants have developed several strong sets of true leaves on their main stems. Never remove more than one-third of total foliage during a single harvesting session so the plant retains sufficient energy reserves for ongoing healthy growth and leaf production.'
       }
     ],
     manualReview: {
@@ -115,17 +116,13 @@ In summary, maintaining an indoor herb garden provides culinary joy and fresh ar
     const result = evaluate('package', sampleData);
 
     expect(result.rules.length).toBe(10);
-    // Package scope applicable max automated points: 90
     expect(result.applicableAutomatedMax).toBe(90);
-    // Automated points should be high (at least 80)
     expect(result.automatedPoints).toBeGreaterThanOrEqual(80);
-    // Manual points: 4 + 5 = 9
     expect(result.manualPoints).toBe(9);
-    // Total points
     expect(result.totalPoints).toBe(result.automatedPoints + 9);
-    // Outline fidelity checked
+    expect(result.isHumanReviewPending).toBe(false);
     expect(result.outlineFidelity).toBeDefined();
-    expect(result.outlineFidelity!.percentage).toBeGreaterThanOrEqual(80);
+    expect(result.outlineFidelity!.percentage).toBe(100);
   });
 
   it('evaluates article scope with package-only rules marked as N/A', () => {
@@ -144,7 +141,6 @@ In summary, maintaining an indoor herb garden provides culinary joy and fresh ar
 
     const result = evaluate('article', articleOnlyData);
     expect(result.rules.length).toBe(10);
-    // In article scope, R1, R2, R3, R7 are N/A (max 50 automated points)
     const r1 = result.rules.find((r) => r.id === 'R1');
     const r2 = result.rules.find((r) => r.id === 'R2');
     const r3 = result.rules.find((r) => r.id === 'R3');
@@ -170,7 +166,6 @@ In summary, maintaining an indoor herb garden provides culinary joy and fresh ar
     const r8 = result.rules.find((r) => r.id === 'R8');
     expect(r8?.status).toBe('na');
     expect(r8?.points).toBe(0);
-    // 90 - 5 (R8) = 85 applicable automated max
     expect(result.applicableAutomatedMax).toBe(85);
   });
 
@@ -179,5 +174,157 @@ In summary, maintaining an indoor herb garden provides culinary joy and fresh ar
     const r2 = result.rules.find((r) => r.id === 'R2');
     expect(r2?.status).toBe('pass');
     expect(r2?.points).toBe(10);
+  });
+
+  it('does NOT award passing status for Rule R2 when description is outside 155-160 chars', () => {
+    const shortData = {
+      ...sampleData,
+      strategy: {
+        ...sampleData.strategy,
+        metaDescription: 'Learn how to start an indoor herb garden at home quickly.' // 57 chars
+      }
+    };
+    const result = evaluate('package', shortData);
+    const r2 = result.rules.find((r) => r.id === 'R2');
+    expect(r2?.status).not.toBe('pass');
+    expect(r2?.points).toBeLessThan(10);
+  });
+
+  it('does NOT silently mark missing required package outputs as N/A', () => {
+    const missingOutputsData = {
+      input: sampleData.input,
+      articleMarkdown: sampleData.articleMarkdown
+      // strategy and faqs omitted in package scope
+    };
+
+    const result = evaluate('package', missingOutputsData as any);
+    const r1 = result.rules.find((r) => r.id === 'R1');
+    const r2 = result.rules.find((r) => r.id === 'R2');
+    const r3 = result.rules.find((r) => r.id === 'R3');
+    const r7 = result.rules.find((r) => r.id === 'R7');
+
+    expect(r1?.status).toBe('fail');
+    expect(r1?.maxPoints).toBe(10);
+    expect(r2?.status).toBe('fail');
+    expect(r2?.maxPoints).toBe(10);
+    expect(r3?.status).toBe('fail');
+    expect(r3?.maxPoints).toBe(10);
+    expect(r7?.status).toBe('fail');
+    expect(r7?.maxPoints).toBe(10);
+    // Denominator remains 90, preventing artificial score inflation
+    expect(result.applicableAutomatedMax).toBe(90);
+  });
+
+  it('properly validates heading structure in R4 and detects invalid level skips', () => {
+    // Markdown jumping from H1 (#) directly to H3 (###) without H2 (##)
+    const invalidJumpMarkdown = `# Main Title
+### Skipped Level Subheading
+Some text here.
+## First H2
+### Subsection One
+Text here.
+## Second H2
+### Subsection Two
+Text here.
+## Third H2
+Text here.
+## Fourth H2
+Text here.`;
+
+    const audit = parseMarkdownHeadings(invalidJumpMarkdown);
+    expect(audit.invalidJumps.length).toBeGreaterThan(0);
+    expect(audit.invalidJumps[0].from).toBe(1);
+    expect(audit.invalidJumps[0].to).toBe(3);
+
+    const result = evaluate('package', {
+      ...sampleData,
+      articleMarkdown: invalidJumpMarkdown
+    });
+    const r4 = result.rules.find((r) => r.id === 'R4');
+    expect(r4?.points).toBeLessThan(10);
+  });
+
+  it('evaluates Outline Fidelity with heading-aware matching rather than loose substring matching', () => {
+    const dataWithParagraphMention = {
+      ...sampleData,
+      outline: {
+        sections: [
+          { h2: 'Unique H2 Section Title', h3: ['Sub Topic Alpha'] },
+          { h2: 'Missing Heading From Draft', h3: ['Missing Sub Heading'] }
+        ]
+      },
+      articleMarkdown: `# Main Article
+
+## Unique H2 Section Title
+
+### Sub Topic Alpha
+Even though the text mentions Missing Heading From Draft in a paragraph, it is NOT an actual H2 heading in the markdown structure.
+
+## Another Different Heading
+
+### Another Sub Topic
+Content continues here.
+
+## Third Heading
+
+## Fourth Heading
+Conclusion.`
+    };
+
+    const result = evaluate('package', dataWithParagraphMention);
+    expect(result.outlineFidelity).toBeDefined();
+    // Only 'Unique H2 Section Title' and 'Sub Topic Alpha' are matched (2 out of 4)
+    expect(result.outlineFidelity!.matched).toBe(2);
+    expect(result.outlineFidelity!.total).toBe(4);
+    expect(result.outlineFidelity!.percentage).toBe(50);
+    expect(result.outlineFidelity!.missingHeadings).toContain('H2: Missing Heading From Draft');
+    expect(result.outlineFidelity!.missingHeadings).toContain('H3: Missing Sub Heading');
+  });
+
+  it('marks Rule R10 as pending when manual review has not been submitted', () => {
+    const pendingData = {
+      ...sampleData,
+      manualReview: undefined
+    };
+
+    const result = evaluate('package', pendingData);
+    const r10 = result.rules.find((r) => r.id === 'R10');
+    expect(r10?.status).toBe('pending');
+    expect(r10?.points).toBe(0);
+    expect(result.isHumanReviewPending).toBe(true);
+    expect(result.manualPoints).toBe(0);
+    expect(result.totalPoints).toBe(result.automatedPoints);
+  });
+
+  it('evaluates Rule R7 based on canonical 40-70 words per FAQ answer', () => {
+    const shortFaqsData = {
+      ...sampleData,
+      faqs: [
+        { question: 'What is herb gardening?', answer: 'It is growing herbs at home on windowsills.' }, // 8 words (too short)
+        { question: 'How much water is needed?', answer: 'Water whenever the soil feels dry to touch.' }, // 8 words
+        { question: 'Which herbs are easiest?', answer: 'Mint and basil are the easiest varieties.' }, // 7 words
+        { question: 'Is direct light necessary?', answer: 'Yes bright sunlight is always required.' }, // 6 words
+        { question: 'When can harvesting begin?', answer: 'Harvest once leaves are mature.' } // 5 words
+      ]
+    };
+
+    const result = evaluate('package', shortFaqsData);
+    const r7 = result.rules.find((r) => r.id === 'R7');
+    expect(r7?.status).not.toBe('pass');
+    expect(r7?.points).toBeLessThan(10);
+  });
+
+  it('scans for unsupported claims in R9 and flags unverified patterns', () => {
+    const claimMarkdown = `# High Yield Indoor Gardening
+
+Our indoor herb garden setup offers a 100% guaranteed harvest. Studies show that 95% of home cooks prefer fresh herbs. We have over 2 million customers worldwide and are ranked #1 in the entire nation.`;
+
+    const result = evaluate('package', {
+      ...sampleData,
+      articleMarkdown: claimMarkdown
+    });
+    const r9 = result.rules.find((r) => r.id === 'R9');
+    expect(r9?.points).toBeLessThan(10);
+    expect(r9?.evidence).toContain('warning flag(s)');
   });
 });

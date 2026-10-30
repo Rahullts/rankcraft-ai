@@ -120,7 +120,7 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
               <div className="mode-score-badge badge-simple">
                 <div className="flex items-baseline gap-1">
                   <span className="score-val">{simpleRun.evaluation.totalPoints}</span>
-                  <span className="score-max">/100 pts</span>
+                  <span className="score-max">/{simpleRun.evaluation.applicableAutomatedMax + 10} pts</span>
                 </div>
                 <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '2px' }}>
                   Article: {getArticleScore(simpleRun.evaluation)}/60 · Metadata: 0/40 (Omitted)
@@ -167,7 +167,7 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
               <h4 className="card-title text-sm">Generated Output (Single-Shot Article)</h4>
               {simpleRun && (
                 <span className="text-muted text-xs">
-                  {countWords(simpleRun.articleMarkdown)} words · {simpleRun.meta?.latencyMs ?? (simpleRun.meta as any)?.durationMs ?? 65}ms
+                  {countWords(simpleRun.articleMarkdown)} / {simpleRun.input.wordCount} words · {simpleRun.meta?.latencyMs ?? (simpleRun.meta as any)?.durationMs ?? 65}ms
                 </span>
               )}
             </div>
@@ -196,7 +196,7 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
               <div className="mode-score-badge badge-improved">
                 <div className="flex items-baseline gap-1">
                   <span className="score-val">{improvedRun.evaluation.totalPoints}</span>
-                  <span className="score-max">/100 pts</span>
+                  <span className="score-max">/{improvedRun.evaluation.applicableAutomatedMax + 10} pts</span>
                 </div>
                 <div style={{ fontSize: '0.72rem', opacity: 0.85, marginTop: '2px' }}>
                   Article: {getArticleScore(improvedRun.evaluation)}/60 · Metadata: {getMetadataScore(improvedRun.evaluation)}/40
@@ -240,7 +240,7 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
                     <strong>Stage 3 (Article):</strong> Target word count ({state.input.wordCount} +/-10%), primary keyword in H1/intro/H2/outro.
                   </div>
                   <div className="stage-mini-box">
-                    <strong>Stage 4 (FAQs):</strong> 5 schema-ready questions with 30-80 word answers ending with '?'.
+                    <strong>Stage 4 (FAQs):</strong> 5 schema-ready questions with 40-70 word answers ending with '?'.
                   </div>
                 </div>
               </div>
@@ -253,7 +253,7 @@ CRITICAL LANGUAGE DIRECTIVE: Write the entire response strictly and completely i
               <h4 className="card-title text-sm">Generated Output (Complete Audited Package)</h4>
               {improvedRun && (
                 <span className="text-muted text-xs">
-                  {countWords(improvedRun.articleMarkdown || '')} words · {improvedRun.meta.totalDurationMs}ms
+                  {countWords(improvedRun.articleMarkdown || '')} / {improvedRun.input.wordCount} words · {improvedRun.meta.totalDurationMs}ms
                 </span>
               )}
             </div>

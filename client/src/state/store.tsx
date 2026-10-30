@@ -70,13 +70,43 @@ function loadInitialState(): State {
 
   try {
     const pkgRaw = localStorage.getItem(STORAGE_KEY_PACKAGE);
-    if (pkgRaw) savedPackage = JSON.parse(pkgRaw);
+    if (pkgRaw) {
+      savedPackage = JSON.parse(pkgRaw);
+      if (savedPackage && savedPackage.input && savedPackage.articleMarkdown) {
+        savedPackage.evaluation = evaluate('package', {
+          input: savedPackage.input,
+          strategy: savedPackage.strategy,
+          outline: savedPackage.outline,
+          articleMarkdown: savedPackage.articleMarkdown,
+          faqs: savedPackage.faqs,
+          manualReview: savedPackage.manualReview
+        });
+      }
+    }
 
     const labRaw = localStorage.getItem(STORAGE_KEY_LAB);
     if (labRaw) {
       const parsed = JSON.parse(labRaw);
       savedLabSimple = parsed.simple || null;
       savedLabImproved = parsed.improved || null;
+
+      if (savedLabSimple && savedLabSimple.input && savedLabSimple.articleMarkdown) {
+        savedLabSimple.evaluation = evaluate('article', {
+          input: savedLabSimple.input,
+          articleMarkdown: savedLabSimple.articleMarkdown,
+          manualReview: savedLabSimple.manualReview
+        });
+      }
+      if (savedLabImproved && savedLabImproved.input && savedLabImproved.articleMarkdown) {
+        savedLabImproved.evaluation = evaluate('package', {
+          input: savedLabImproved.input,
+          strategy: savedLabImproved.strategy,
+          outline: savedLabImproved.outline,
+          articleMarkdown: savedLabImproved.articleMarkdown,
+          faqs: savedLabImproved.faqs,
+          manualReview: savedLabImproved.manualReview
+        });
+      }
     }
   } catch (e) {
     console.warn('Could not read from localStorage', e);
@@ -207,6 +237,12 @@ function reducer(state: State, action: Action): State {
           manualReview: updatedReview,
           evaluation: evalResult
         };
+        try {
+          localStorage.setItem(
+            STORAGE_KEY_LAB,
+            JSON.stringify({ simple: updatedSimple, improved: state.labImprovedRun })
+          );
+        } catch {}
         return { ...state, labSimpleRun: updatedSimple };
       }
 
@@ -228,6 +264,12 @@ function reducer(state: State, action: Action): State {
           manualReview: updatedReview,
           evaluation: evalResult
         };
+        try {
+          localStorage.setItem(
+            STORAGE_KEY_LAB,
+            JSON.stringify({ simple: state.labSimpleRun, improved: updatedImproved })
+          );
+        } catch {}
         return { ...state, labImprovedRun: updatedImproved };
       }
 

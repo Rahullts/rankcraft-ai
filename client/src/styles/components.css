@@ -624,6 +624,8 @@
 .badge-pass { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; font-weight: 700; letter-spacing: 0.03em; }
 .badge-partial { background: #FEF3C7; color: #B45309; border: 1px solid #FCD34D; font-weight: 700; letter-spacing: 0.03em; }
 .badge-fail { background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; font-weight: 700; letter-spacing: 0.03em; }
+.badge-na { background: #F3F4F6; color: #6B7280; border: 1px solid #D1D5DB; font-weight: 700; letter-spacing: 0.03em; }
+.badge-pending { background: #E0E7FF; color: #4338CA; border: 1px solid #A5B4FC; font-weight: 700; letter-spacing: 0.03em; }
 
 /* Common Card */
 .card {
@@ -770,6 +772,25 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.stale-warning-banner {
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.stale-warning-banner strong {
+  color: #78350F;
 }
 
 /* --------------------------------------------------------------------------
@@ -2319,8 +2340,9 @@
 
 .eval-summary-grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
   gap: 20px;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
@@ -2334,6 +2356,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
+  min-width: 0;
 }
 
 .score-card-body {
@@ -2354,6 +2377,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .score-total, .score-large {
@@ -2443,12 +2467,22 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.disclaimer-card .card-body {
+  padding: 16px 20px;
+  overflow: hidden;
 }
 
 .disclaimer-text {
-  font-size: 13px;
-  line-height: 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
   color: var(--text-muted);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .rubric-accordion-list {

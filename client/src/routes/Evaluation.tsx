@@ -51,7 +51,7 @@ export const Evaluation: React.FC = () => {
         <div>
           <h2 className="page-title">Content Quality & Rubric Evaluation</h2>
           <p className="page-subtitle">
-            100-point deterministic rubric (R1-R10) measuring structural adherence, keyword distribution, and constraint compliance.
+            100-point evaluation rubric measuring structural adherence, keyword distribution, prompt constraint compliance, and qualitative human fit.
           </p>
         </div>
         <div className="source-selector-group">
@@ -110,12 +110,21 @@ export const Evaluation: React.FC = () => {
                     </div>
                     <div className="breakdown-item">
                       <span className="b-label">Human Review (R10):</span>
-                      <span className="b-val">{activeEval.manualPoints} / 10 pts</span>
+                      <span className="b-val">
+                        {activeEval.isHumanReviewPending ? 'Pending (0 / 10 pts)' : `${activeEval.manualPoints} / 10 pts`}
+                      </span>
                     </div>
                     {activeEval.outlineFidelity && (
                       <div className="breakdown-item">
                         <span className="b-label">Outline Fidelity:</span>
-                        <span className="b-val">{activeEval.outlineFidelity.percentage}% ({activeEval.outlineFidelity.matched}/{activeEval.outlineFidelity.total})</span>
+                        <div className="text-right">
+                          <span className="b-val">{activeEval.outlineFidelity.percentage}% ({activeEval.outlineFidelity.matched}/{activeEval.outlineFidelity.total})</span>
+                          {activeEval.outlineFidelity.missingHeadings && activeEval.outlineFidelity.missingHeadings.length > 0 && (
+                            <div style={{ fontSize: '0.72rem', color: '#B45309', marginTop: '2px' }}>
+                              Unmatched: {activeEval.outlineFidelity.missingHeadings.slice(0, 2).join('; ')}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -125,15 +134,15 @@ export const Evaluation: React.FC = () => {
 
             <div className="card disclaimer-card">
               <div className="card-header">
-                <Info size={18} className="text-primary" />
+                <Info size={18} className="text-primary flex-shrink-0" />
                 <h4 className="card-title text-sm">Academic Methodology Note</h4>
               </div>
               <div className="card-body">
                 <p className="disclaimer-text">
-                  Scores are calculated <strong>deterministically</strong> using character counting, regular expressions, heading depth analysis, and exact keyword matches without LLM hallucinations.
+                  <strong>R1–R9</strong> are calculated deterministically using programmatic checks (character counting, regex boundary analysis, heading depth hierarchy, and exact keyword matches without LLM hallucinations).
                 </p>
                 <p className="disclaimer-text mt-2">
-                  Scores measure <em>prompt engineering constraint adherence</em>. They do not simulate live search engine indexing or guarantee Google rankings.
+                  <strong>R10</strong> is a human reviewer qualitative assessment. The combined rubric evaluates content quality and prompt-constraint adherence; it does not predict or guarantee search-engine rankings.
                 </p>
               </div>
             </div>
@@ -146,7 +155,9 @@ export const Evaluation: React.FC = () => {
                 <ShieldCheck size={20} className="card-header-icon text-primary" />
                 <h3 className="card-title">Rule R10: Human Reviewer Scoring (0-10 Points)</h3>
               </div>
-              <span className="badge badge-neutral">Interactive Evaluation</span>
+              <span className={`badge ${activeManual?.intentMatch !== undefined ? 'badge-success' : 'badge-pending'}`}>
+                {activeManual?.intentMatch !== undefined ? 'Completed Review' : 'Pending Review'}
+              </span>
             </div>
             <div className="card-body">
               <p className="text-muted text-sm mb-4">
