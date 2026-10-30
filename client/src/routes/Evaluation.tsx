@@ -155,8 +155,8 @@ export const Evaluation: React.FC = () => {
                 <ShieldCheck size={20} className="card-header-icon text-primary" />
                 <h3 className="card-title">Rule R10: Human Reviewer Scoring (0-10 Points)</h3>
               </div>
-              <span className={`badge ${activeManual?.intentMatch !== undefined ? 'badge-success' : 'badge-pending'}`}>
-                {activeManual?.intentMatch !== undefined ? 'Completed Review' : 'Pending Review'}
+              <span className={`badge ${typeof activeManual?.intentMatch === 'number' && typeof activeManual?.toneAudienceFit === 'number' ? 'badge-success' : 'badge-pending'}`}>
+                {typeof activeManual?.intentMatch === 'number' && typeof activeManual?.toneAudienceFit === 'number' ? 'Completed Review' : 'Pending Review'}
               </span>
             </div>
             <div className="card-body">

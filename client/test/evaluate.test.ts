@@ -327,4 +327,164 @@ Our indoor herb garden setup offers a 100% guaranteed harvest. Studies show that
     expect(r9?.points).toBeLessThan(10);
     expect(r9?.evidence).toContain('warning flag(s)');
   });
+
+  it('R8 Readability: isolates clean prose and prevents long headings, lists, and code blocks from inflating sentence length', () => {
+    const markdownWithHeavyFormatting = `# Comprehensive Guide to Modern High Efficiency Culinary Herb Cultivation for Urban Apartment Dwellers
+## First Major Strategic Consideration Regarding Proper Spectrum Selection and Indoor Lighting Hardware
+Here is the first clean narrative sentence explaining indoor lighting methods. Sunlight is essential for Mediterranean herbs to produce rich aromatic oils. Position your containers near south facing windows to ensure maximum daily illumination.
+\`\`\`typescript
+const lightingConfig = { spectrum: 'full', lumens: 5000, durationHours: 14 };
+function checkSensor() { return true; }
+\`\`\`
+## Detailed Soil Composition and Moisture Retention Architecture for Small Pots
+- Premium indoor potting mix with coarse horticultural perlite
+- Organic worm castings for gentle sustained microbial nutrient delivery
+- Sphagnum peat moss for balanced root moisture retention capacity
+- Horticultural sand to enhance drainage speed across root balls
+- Coarse perlite particles to prevent root suffocation in glazed containers
+- Crushed pumice to maintain microscopic aeration channels between watering sessions
+1. Measure moisture content using a calibrated digital probe.
+2. Allow container soil to dry slightly before irrigating again.
+Proper drainage prevents moisture stagnation and root rot in small residential pots. Consistent observation helps beginner gardeners keep delicate herbs healthy throughout winter.
+## Troubleshooting and Seasonal Temperature Regulation
+Herb pots require protection against freezing windowpane drafts.`;
+
+    const result = evaluate('article', {
+      input: {
+        primaryKeyword: 'culinary herbs',
+        wordCount: 300,
+        language: 'English'
+      },
+      articleMarkdown: markdownWithHeavyFormatting
+    });
+
+    const r8 = result.rules.find((r) => r.id === 'R8');
+    expect(r8?.points).toBe(5);
+    expect(r8?.status).toBe('pass');
+  });
+
+  it('R10 Completion-State: requires BOTH intentMatch and toneAudienceFit to be numbers', () => {
+    // Only intentMatch defined
+    const onlyIntent = evaluate('package', {
+      ...sampleData,
+      manualReview: { intentMatch: 4, toneAudienceFit: undefined }
+    });
+    const r10OnlyIntent = onlyIntent.rules.find((r) => r.id === 'R10');
+    expect(r10OnlyIntent?.status).toBe('pending');
+    expect(r10OnlyIntent?.points).toBe(0);
+    expect(onlyIntent.isHumanReviewPending).toBe(true);
+
+    // Only toneAudienceFit defined
+    const onlyTone = evaluate('package', {
+      ...sampleData,
+      manualReview: { intentMatch: undefined, toneAudienceFit: 5 }
+    });
+    const r10OnlyTone = onlyTone.rules.find((r) => r.id === 'R10');
+    expect(r10OnlyTone?.status).toBe('pending');
+    expect(r10OnlyTone?.points).toBe(0);
+    expect(onlyTone.isHumanReviewPending).toBe(true);
+
+    // Both defined
+    const bothDefined = evaluate('package', {
+      ...sampleData,
+      manualReview: { intentMatch: 4, toneAudienceFit: 5 }
+    });
+    const r10Both = bothDefined.rules.find((r) => r.id === 'R10');
+    expect(r10Both?.status).toBe('pass');
+    expect(r10Both?.points).toBe(9);
+    expect(bothDefined.isHumanReviewPending).toBe(false);
+  });
+
+  it('Outline Fidelity Precision: rejects substring partial matches', () => {
+    const dataWithPartialMatches = {
+      ...sampleData,
+      outline: {
+        sections: [
+          { h2: 'Essential Soil Requirements for Herbs', h3: ['Detailed Drainage Mechanics'] }
+        ]
+      },
+      articleMarkdown: `# Main Guide
+## Essential Soil
+### Detailed Drainage
+Some text here.
+## Another Section
+### Sub Topic
+More text.`
+    };
+
+    const result = evaluate('package', dataWithPartialMatches);
+    expect(result.outlineFidelity).toBeDefined();
+    expect(result.outlineFidelity!.matched).toBe(0);
+    expect(result.outlineFidelity!.total).toBe(2);
+    expect(result.outlineFidelity!.missingHeadings).toContain('H2: Essential Soil Requirements for Herbs');
+    expect(result.outlineFidelity!.missingHeadings).toContain('H3: Detailed Drainage Mechanics');
+  });
+
+  it('Outline Fidelity Precision: enforces 1-to-1 matching and avoids duplicate matching', () => {
+    const dataWithDuplicates = {
+      ...sampleData,
+      outline: {
+        sections: [
+          { h2: 'General Overview', h3: [] },
+          { h2: 'General Overview', h3: [] }
+        ]
+      },
+      articleMarkdown: `# Main Guide
+## General Overview
+Article only contains a single H2 named General Overview.
+## Another Section
+More text.`
+    };
+
+    const result = evaluate('package', dataWithDuplicates);
+    expect(result.outlineFidelity).toBeDefined();
+    expect(result.outlineFidelity!.matched).toBe(1);
+    expect(result.outlineFidelity!.total).toBe(2);
+    expect(result.outlineFidelity!.percentage).toBe(50);
+    expect(result.outlineFidelity!.matchedHeadings).toEqual(['H2: General Overview']);
+    expect(result.outlineFidelity!.missingHeadings).toEqual(['H2: General Overview']);
+  });
+
+  it('Outline Fidelity Precision: enforces strict H2-to-H2 and H3-to-H3 level consistency', () => {
+    const dataWithSwappedLevels = {
+      ...sampleData,
+      outline: {
+        sections: [
+          { h2: 'Lighting Requirements', h3: ['Pots and Drainage'] }
+        ]
+      },
+      articleMarkdown: `# Main Guide
+## Pots and Drainage
+Some text.
+### Lighting Requirements
+Some text.`
+    };
+
+    const result = evaluate('package', dataWithSwappedLevels);
+    expect(result.outlineFidelity).toBeDefined();
+    expect(result.outlineFidelity!.matched).toBe(0);
+    expect(result.outlineFidelity!.missingHeadings).toContain('H2: Lighting Requirements');
+    expect(result.outlineFidelity!.missingHeadings).toContain('H3: Pots and Drainage');
+  });
+
+  it('Outline Fidelity Precision: tolerates harmless punctuation, casing, and whitespace differences', () => {
+    const dataWithHarmlessDiffs = {
+      ...sampleData,
+      outline: {
+        sections: [
+          { h2: '1. Essential Soil Requirements:', h3: ['Pots & Drainage Needs?'] }
+        ]
+      },
+      articleMarkdown: `# Main Guide
+## 1 Essential Soil Requirements
+### Pots   Drainage Needs
+Some text.`
+    };
+
+    const result = evaluate('package', dataWithHarmlessDiffs);
+    expect(result.outlineFidelity).toBeDefined();
+    expect(result.outlineFidelity!.matched).toBe(2);
+    expect(result.outlineFidelity!.total).toBe(2);
+    expect(result.outlineFidelity!.percentage).toBe(100);
+  });
 });

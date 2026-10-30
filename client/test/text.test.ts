@@ -5,7 +5,9 @@ import {
   matchKeywordExact,
   calculateKeywordDensity,
   splitSentences,
-  findUnsupportedClaims
+  findUnsupportedClaims,
+  extractCleanProse,
+  normalizeHeadingText
 } from '../src/lib/text';
 
 describe('Text Utilities (Section E7 & Rule R1-R9)', () => {
@@ -71,5 +73,42 @@ describe('Text Utilities (Section E7 & Rule R1-R9)', () => {
     // Only 95% should match in non-English
     expect(flags.length).toBe(1);
     expect(flags[0].sentence).toContain('95%');
+  });
+
+  it('extractCleanProse strips headings, code blocks, bullet lists, and numbered lists', () => {
+    const raw = `# Heading 1
+## Heading 2
+This is genuine prose paragraph one. It has multiple words.
+
+\`\`\`javascript
+const foo = 'bar';
+console.log(foo);
+\`\`\`
+
+- Bullet item one
+- Bullet item two
+* Bullet item three
++ Bullet item four
+
+1. Numbered step one
+2. Numbered step two
+
+This is genuine prose paragraph two. It continues the discussion.`;
+
+    const clean = extractCleanProse(raw);
+    expect(clean).not.toContain('Heading 1');
+    expect(clean).not.toContain('Heading 2');
+    expect(clean).not.toContain('const foo');
+    expect(clean).not.toContain('Bullet item');
+    expect(clean).not.toContain('Numbered step');
+    expect(clean).toContain('This is genuine prose paragraph one. It has multiple words.');
+    expect(clean).toContain('This is genuine prose paragraph two. It continues the discussion.');
+  });
+
+  it('normalizeHeadingText normalizes casing, hashes, whitespace, and punctuation', () => {
+    expect(normalizeHeadingText('### 1. Essential Light Requirements: ')).toBe('1 essential light requirements');
+    expect(normalizeHeadingText('Essential Light Requirements?')).toBe('essential light requirements');
+    expect(normalizeHeadingText('  Essential    Light   Requirements  ')).toBe('essential light requirements');
+    expect(normalizeHeadingText('Pots & Drainage (Small Spaces)')).toBe('pots drainage small spaces');
   });
 });

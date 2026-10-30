@@ -854,43 +854,97 @@ export function generateAdaptiveArticle(params: AdaptiveArticleParams): string {
 // Controlled Correction & Trimming Helper for Live LLM Provider Output
 // -----------------------------------------------------------------------------
 export function calibrateArticleWordCount(markdown: string, targetWords: number): string {
-  if (!markdown || !markdown.trim()) return markdown;
+  if (!markdown || !markdown.trim() || targetWords <= 0) return markdown;
   const current = countWords(markdown);
-  const diffPct = Math.abs(current - targetWords) / targetWords;
 
-  // If already within 8%, leave as is
-  if (diffPct <= 0.08) return markdown;
+  // If already within 8% of target or under target, no trimming needed.
+  // Under-target live generation is handled via prompt expansion retry.
+  if (current <= targetWords * 1.08) {
+    return markdown;
+  }
 
-  // If more than 10% over target, trim trailing body sentences in middle sections
-  if (current > targetWords * 1.08) {
-    const lines = markdown.split('\n');
-    let trimmed = [...lines];
-    let words = current;
+  // Over target by > 8%: carefully trim trailing sentences across middle body sections.
+  // Preserves:
+  // 1. Top-level H1 and introductory section (before the first H2)
+  // 2. All H2/H3 headings, lists, and code blocks
+  // 3. Concluding H2 section (the final H2 block)
+  // Trimming is distributed across eligible middle body paragraphs (cycling through paragraphs).
+  const lines = markdown.split('\n');
 
-    // Search for body paragraphs between first H2 and conclusion H2
-    let inBody = false;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      const line = lines[i].trim();
-      if (line.toLowerCase().includes('conclusion') && line.startsWith('## ')) {
-        inBody = true;
-        continue;
-      }
-      if (inBody && line.startsWith('## ')) {
-        break; // Reached before body
-      }
-      if (inBody && line.length > 50 && !line.startsWith('#') && !line.startsWith('-')) {
-        // Try trimming last sentence of this paragraph
-        const sentences = line.split(/(?<=[.!?])\s+/);
-        if (sentences.length > 2) {
-          const removed = sentences.pop();
-          trimmed[i] = sentences.join(' ');
-          words -= countWords(removed || '');
-          if (words <= targetWords * 1.04) break;
+  // Identify H2 heading lines
+  const h2Indices: number[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim().startsWith('## ')) {
+      h2Indices.push(i);
+    }
+  }
+
+  // Require at least 2 H2 sections to have an introductory middle and a concluding section
+  if (h2Indices.length < 2) return markdown;
+
+  const firstH2Idx = h2Indices[0];
+  const lastH2Idx = h2Indices[h2Indices.length - 1]; // Conclusion starts here
+
+  // Find eligible body paragraph indices between firstH2Idx and lastH2Idx
+  const eligibleLineIndices: number[] = [];
+  let inCode = false;
+  for (let i = firstH2Idx + 1; i < lastH2Idx; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('```')) {
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) continue;
+
+    // Do not touch headings, bullet/numbered lists, or very short lines
+    if (
+      trimmed.startsWith('#') ||
+      trimmed.startsWith('-') ||
+      trimmed.startsWith('*') ||
+      trimmed.startsWith('+') ||
+      /^\d+\./.test(trimmed)
+    ) {
+      continue;
+    }
+
+    if (trimmed.length > 60) {
+      eligibleLineIndices.push(i);
+    }
+  }
+
+  if (eligibleLineIndices.length === 0) return markdown;
+
+  const modifiedLines = [...lines];
+  let currentWords = current;
+  const targetCeiling = Math.round(targetWords * 1.04);
+
+  // Distributed round-robin trimming of non-essential trailing sentences across middle paragraphs
+  let madeProgress = true;
+  let pass = 0;
+  while (currentWords > targetCeiling && madeProgress && pass < 6) {
+    madeProgress = false;
+    pass++;
+
+    for (const lineIdx of eligibleLineIndices) {
+      if (currentWords <= targetCeiling) break;
+
+      const paragraphText = modifiedLines[lineIdx];
+      // Split into sentences preserving punctuation
+      const sentences = paragraphText.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g);
+      // Keep at least 2 sentences per paragraph so paragraphs stay substantive
+      if (sentences && sentences.length > 2) {
+        const removedSentence = sentences.pop();
+        const updatedParagraph = sentences.map((s) => s.trim()).join(' ');
+        const wordsRemoved = countWords(paragraphText) - countWords(updatedParagraph);
+
+        if (wordsRemoved > 0) {
+          modifiedLines[lineIdx] = updatedParagraph;
+          currentWords -= wordsRemoved;
+          madeProgress = true;
         }
       }
     }
-    return trimmed.join('\n');
   }
 
-  return markdown;
+  return modifiedLines.join('\n');
 }

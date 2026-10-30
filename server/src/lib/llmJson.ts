@@ -133,40 +133,62 @@ export async function callProviderWithMarkdownValidation(
   let totalInputTokens = initialResult.usage?.inputTokens || 0;
   let totalOutputTokens = initialResult.usage?.outputTokens || 0;
 
-  const validateMarkdown = (text: string): { valid: boolean; reason?: string } => {
-    if (!text || !text.trim()) {
-      return { valid: false, reason: 'Article output is empty.' };
+  const validateAndCalibrate = (
+    rawText: string
+  ): { valid: boolean; text: string; reason?: string } => {
+    if (!rawText || !rawText.trim()) {
+      return { valid: false, text: rawText, reason: 'Article output is empty.' };
     }
-    const lines = text.trim().split('\n').map((l) => l.trim());
+    const lines = rawText.trim().split('\n').map((l) => l.trim());
     const h1Line = lines.find((l) => l.startsWith('# '));
     if (!h1Line) {
-      return { valid: false, reason: 'Missing top-level H1 heading (# ...).' };
+      return { valid: false, text: rawText, reason: 'Missing top-level H1 heading (# ...).' };
     }
     const h2Count = lines.filter((l) => l.startsWith('## ')).length;
     if (h2Count < 4) {
-      return { valid: false, reason: `Article must contain at least 4 H2 headings (found ${h2Count}).` };
+      return {
+        valid: false,
+        text: rawText,
+        reason: `Article must contain at least 4 H2 headings (found ${h2Count}).`
+      };
     }
+
+    let processedText = rawText.trim();
     if (targetWords) {
-      const words = countWords(text);
-      const diffPct = Math.abs(words - targetWords) / targetWords;
-      if (diffPct > 0.25) {
+      const minWords = Math.round(targetWords * 0.90);
+      const maxWords = Math.round(targetWords * 1.10);
+
+      // Attempt calibration if over target
+      if (countWords(processedText) > maxWords) {
+        processedText = calibrateArticleWordCount(processedText, targetWords);
+      }
+
+      const finalWords = countWords(processedText);
+
+      if (finalWords < minWords) {
         return {
           valid: false,
-          reason: `Article word count is ${words} words, which differs significantly from target of ${targetWords} words (must be within 10% tolerance).`
+          text: processedText,
+          reason: `Article word count is ${finalWords} words, which is under target ${targetWords} words (must be between ${minWords} and ${maxWords} words, strictly within ±10% tolerance). Please expand the body sections with comprehensive explanations, depth, and practical guidance.`
+        };
+      }
+
+      if (finalWords > maxWords) {
+        return {
+          valid: false,
+          text: processedText,
+          reason: `Article word count is ${finalWords} words, which exceeds target ${targetWords} words (must be between ${minWords} and ${maxWords} words, strictly within ±10% tolerance). Please condense the body sections to be more concise while maintaining all headings.`
         };
       }
     }
-    return { valid: true };
+
+    return { valid: true, text: processedText };
   };
 
-  const firstCheck = validateMarkdown(initialResult.text);
+  const firstCheck = validateAndCalibrate(initialResult.text);
   if (firstCheck.valid) {
-    let finalOutput = initialResult.text.trim();
-    if (targetWords) {
-      finalOutput = calibrateArticleWordCount(finalOutput, targetWords);
-    }
     return {
-      text: finalOutput,
+      text: firstCheck.text,
       attempts: 1,
       usage: { inputTokens: totalInputTokens, outputTokens: totalOutputTokens }
     };
@@ -177,7 +199,11 @@ export async function callProviderWithMarkdownValidation(
   const retryUserPrompt = `Your previous article output failed validation.
 Problem: ${firstCheck.reason}
 H1 must start with: # ${expectedH1}
-${targetWords ? `Target word count: exactly around ${targetWords} words (within 10% tolerance, between ${Math.round(targetWords * 0.9)} and ${Math.round(targetWords * 1.1)} words).\n` : ''}Provide the complete, corrected article in Markdown matching all original constraints.`;
+${
+  targetWords
+    ? `Target word count: strictly between ${Math.round(targetWords * 0.9)} and ${Math.round(targetWords * 1.1)} words (target is ${targetWords} words ±10%).\n`
+    : ''
+}Provide the complete, corrected article in Markdown matching all original constraints.`;
 
   const retryReq: LlmRequest = {
     system: req.system,
@@ -190,14 +216,10 @@ ${targetWords ? `Target word count: exactly around ${targetWords} words (within 
   totalInputTokens += retryResult.usage?.inputTokens || 0;
   totalOutputTokens += retryResult.usage?.outputTokens || 0;
 
-  const secondCheck = validateMarkdown(retryResult.text);
+  const secondCheck = validateAndCalibrate(retryResult.text);
   if (secondCheck.valid) {
-    let finalOutput = retryResult.text.trim();
-    if (targetWords) {
-      finalOutput = calibrateArticleWordCount(finalOutput, targetWords);
-    }
     return {
-      text: finalOutput,
+      text: secondCheck.text,
       attempts: 2,
       usage: { inputTokens: totalInputTokens, outputTokens: totalOutputTokens }
     };

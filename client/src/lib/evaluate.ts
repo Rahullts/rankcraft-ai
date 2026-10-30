@@ -6,6 +6,8 @@ import {
   splitSentences,
   findUnsupportedClaims,
   parseMarkdownHeadings,
+  extractCleanProse,
+  normalizeHeadingText,
   HeadingHierarchyAudit,
   ClaimFlag
 } from './text.js';
@@ -469,9 +471,10 @@ export function evaluate(
   {
     if (input.language === 'English') {
       let r8Pts = 0;
-      const sentences = splitSentences(articleMarkdown || '');
-      const totalWords = countWords(articleMarkdown || '');
-      const avgSentenceLen = sentences.length > 0 ? totalWords / sentences.length : 0;
+      const cleanProse = extractCleanProse(articleMarkdown || '');
+      const sentences = splitSentences(cleanProse);
+      const proseWords = countWords(cleanProse);
+      const avgSentenceLen = sentences.length > 0 ? proseWords / sentences.length : 0;
 
       if (avgSentenceLen <= 20.0) r8Pts = 5;
       else if (avgSentenceLen <= 25.0) r8Pts = 3;
@@ -483,8 +486,8 @@ export function evaluate(
         points: r8Pts,
         maxPoints: 5,
         status: r8Status,
-        evidence: `Average sentence length: ${avgSentenceLen.toFixed(1)} words across ${sentences.length} sentences (target: <= 20 words for full score).`,
-        explanation: 'Evaluates average sentence length in cleaned prose: <= 20 words awards 5 pts; 20-25 words awards 3 pts; > 25 words awards 0 pts.',
+        evidence: `Average sentence length: ${avgSentenceLen.toFixed(1)} words across ${sentences.length} sentences in clean prose (target: <= 20 words for full score).`,
+        explanation: 'Evaluates average sentence length in cleaned prose (excluding headings, code blocks, and list items): <= 20 words awards 5 pts; 20.1-25 words awards 3 pts; > 25 words awards 0 pts.',
         appliesTo: 'article'
       });
     } else {
@@ -571,34 +574,47 @@ export function evaluate(
   const totalPoints = automatedPoints + manualPoints;
 
   // ------------------------------------------------------------------------
-  // Outline Fidelity Check (Heading-Aware Comparison, Informational Metric)
+  // Outline Fidelity Check (Heading-Aware 1-to-1 Comparison, Informational Metric)
   // ------------------------------------------------------------------------
   let outlineFidelity: OutlineFidelityResult | undefined;
   if (outline && outline.sections && articleMarkdown) {
     const headingAudit = parseMarkdownHeadings(articleMarkdown);
-    const normArticleH2 = headingAudit.h2Headings.map((h) =>
-      h.text.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
-    );
-    const normArticleH3 = headingAudit.h3Headings.map((h) =>
-      h.text.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
-    );
+    const availableArticleH2 = headingAudit.h2Headings.map((h, idx) => ({
+      idx,
+      norm: normalizeHeadingText(h.text),
+      raw: h.text,
+      used: false
+    }));
+
+    const availableArticleH3 = headingAudit.h3Headings.map((h, idx) => ({
+      idx,
+      norm: normalizeHeadingText(h.text),
+      raw: h.text,
+      used: false
+    }));
 
     const matchedHeadings: string[] = [];
     const missingHeadings: string[] = [];
 
     for (const sec of outline.sections) {
-      const normOutlineH2 = sec.h2.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-      const h2Found = normArticleH2.some((artH2) => artH2.includes(normOutlineH2) || normOutlineH2.includes(artH2));
-      if (h2Found) {
+      const normOutlineH2 = normalizeHeadingText(sec.h2);
+      const matchedH2 = availableArticleH2.find(
+        (art) => !art.used && art.norm === normOutlineH2
+      );
+      if (matchedH2) {
+        matchedH2.used = true;
         matchedHeadings.push(`H2: ${sec.h2}`);
       } else {
         missingHeadings.push(`H2: ${sec.h2}`);
       }
 
       for (const sub of sec.h3) {
-        const normOutlineH3 = sub.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-        const h3Found = normArticleH3.some((artH3) => artH3.includes(normOutlineH3) || normOutlineH3.includes(artH3));
-        if (h3Found) {
+        const normOutlineH3 = normalizeHeadingText(sub);
+        const matchedH3 = availableArticleH3.find(
+          (art) => !art.used && art.norm === normOutlineH3
+        );
+        if (matchedH3) {
+          matchedH3.used = true;
           matchedHeadings.push(`H3: ${sub}`);
         } else {
           missingHeadings.push(`H3: ${sub}`);

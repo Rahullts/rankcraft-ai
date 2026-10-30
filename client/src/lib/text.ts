@@ -29,6 +29,39 @@ export function normalizeWhitespace(str: string): string {
   return str.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
+/**
+ * Normalizes heading text for exact 1-to-1 outline fidelity comparison.
+ * Strips markdown hashes, normalizes casing/whitespace, and strips harmless punctuation.
+ */
+export function normalizeHeadingText(heading: string): string {
+  if (!heading) return '';
+  return heading
+    .replace(/^#+\s*/, '')
+    .replace(/#+$/, '')
+    .toLowerCase()
+    .replace(/[.,:;!?'"’“”()[\]{}_/\\&|~`\-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Extracts clean narrative prose from markdown for accurate readability (R8) scoring.
+ * Excludes headings, fenced code blocks, bullet lists, numbered lists, URLs, and markdown formatting.
+ */
+export function extractCleanProse(markdownText: string): string {
+  if (!markdownText || !markdownText.trim()) return '';
+
+  return markdownText
+    .replace(/```[\s\S]*?```/g, '') // strip fenced code blocks
+    .replace(/^#+\s+.*$/gm, '') // strip all headings
+    .replace(/^[-*+]\s+.*$/gm, '') // strip unordered list items
+    .replace(/^\d+\.\s+.*$/gm, '') // strip ordered list items
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // link text only
+    .replace(/https?:\/\/[^\s]+/g, '') // strip standalone URLs
+    .replace(/[*_`~]/g, '') // strip bold, italics, inline code markers
+    .trim();
+}
+
 export function matchKeywordExact(text: string, keyword: string): number {
   if (!text || !keyword) return 0;
   const normText = normalizeWhitespace(text);
@@ -54,12 +87,12 @@ export function calculateKeywordDensity(text: string, keyword: string): number {
 export function splitSentences(markdownText: string): string[] {
   if (!markdownText || !markdownText.trim()) return [];
 
-  // Exclude headings, code blocks and list markers
+  // Exclude headings, code blocks and list items
   let text = markdownText
     .replace(/```[\s\S]*?```/g, '')
     .replace(/^#+\s+.*$/gm, '')
-    .replace(/^[-*+]\s+/gm, '')
-    .replace(/^\d+\.\s+/gm, '');
+    .replace(/^[-*+]\s+.*$/gm, '')
+    .replace(/^\d+\.\s+.*$/gm, '');
 
   // Split on ., !, ?, and Devanagari danda (।) followed by whitespace or end of string
   const rawSentences = text.split(/(?:[.!?।])(?:\s+|$)/);
