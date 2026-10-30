@@ -194,16 +194,55 @@ export async function callProviderWithMarkdownValidation(
     };
   }
 
-  // Retry once with specific problem stated
+  // Retry once with specific problem stated, complete context preservation, and previous draft for revision
   attempts = 2;
-  const retryUserPrompt = `Your previous article output failed validation.
-Problem: ${firstCheck.reason}
-H1 must start with: # ${expectedH1}
-${
-  targetWords
-    ? `Target word count: strictly between ${Math.round(targetWords * 0.9)} and ${Math.round(targetWords * 1.1)} words (target is ${targetWords} words ±10%).\n`
+
+  const minWords = targetWords ? Math.round(targetWords * 0.90) : undefined;
+  const maxWords = targetWords ? Math.round(targetWords * 1.10) : undefined;
+
+  let actionGuidance = '';
+  if (targetWords && minWords !== undefined && maxWords !== undefined) {
+    const prevWords = countWords(firstCheck.text || initialResult.text);
+    if (prevWords < minWords) {
+      actionGuidance = `ACTION REQUIRED: EXPAND CONTENT.
+The previous draft was only ${prevWords} words, which is under the minimum requirement of ${minWords} words (target: ${targetWords} words ±10%, acceptable range: ${minWords} to ${maxWords} words).
+- Expand each section with actionable, in-depth explanations, real-world examples, and practical guidance.
+- Do NOT use repetitive filler. Add genuine value and depth to meet the target word count.`;
+    } else if (prevWords > maxWords) {
+      actionGuidance = `ACTION REQUIRED: CONDENSE CONTENT.
+The previous draft was ${prevWords} words, which exceeds the maximum limit of ${maxWords} words (target: ${targetWords} words ±10%, acceptable range: ${minWords} to ${maxWords} words).
+- Tighten sentences and eliminate redundant phrasing across middle body sections.
+- Make each section concise and punchy while retaining all core facts, headings, and outline coverage.`;
+    }
+  }
+
+  const correctionInstructions = `================================================================================
+REVISION INSTRUCTIONS (PREVIOUS ATTEMPT FAILED VALIDATION)
+================================================================================
+Your previous article output failed validation for the following reason:
+${firstCheck.reason}
+
+${actionGuidance ? `${actionGuidance}\n\n` : ''}${
+  targetWords && minWords !== undefined && maxWords !== undefined
+    ? `TARGET WORD COUNT REQUIREMENT:
+- Requested target: ${targetWords} words
+- Exact acceptable range (±10%): strictly between ${minWords} and ${maxWords} words\n\n`
     : ''
-}Provide the complete, corrected article in Markdown matching all original constraints.`;
+}CRITICAL CONSTRAINTS TO PRESERVE:
+- Must preserve the exact top-level H1: # ${expectedH1}
+- Must preserve primary keyword placement and natural distribution as requested.
+- Must preserve all generated outline sections (H2 and H3 headings) in exact order.
+- Must strictly preserve the requested language, tone, search intent, target audience, and market from the original instructions above.
+- Do NOT output placeholder text, conversational filler, or meta-commentary. Provide ONLY the complete revised article in Markdown.
+
+PREVIOUS DRAFT FOR REFERENCE & REVISION:
+--- BEGIN PREVIOUS DRAFT ---
+${initialResult.text.trim()}
+--- END PREVIOUS DRAFT ---
+
+Please revise the previous draft above, ensuring full adherence to all original specifications and constraints.`;
+
+  const retryUserPrompt = `${req.user}\n\n${correctionInstructions}`;
 
   const retryReq: LlmRequest = {
     system: req.system,

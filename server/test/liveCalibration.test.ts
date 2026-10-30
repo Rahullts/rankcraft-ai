@@ -174,4 +174,169 @@ describe('Live LLM Word-Count Calibration & Reliability (Section D & E)', () => 
     expect(actualWords).toBeLessThanOrEqual(1100);
     expect(actualWords).toBeGreaterThanOrEqual(900);
   });
+
+  it('retains complete original user context, strategy, outline, failure reason, and previous draft on under-target retry', async () => {
+    let capturedRetryReq: LlmRequest | null = null;
+    const initialUnderTargetDraft = buildMockArticleWithWords('Complete Hydroponic Herb Guide', 320); // 320 vs 800 target
+    const correctedDraft = buildMockArticleWithWords('Complete Hydroponic Herb Guide', 810);
+
+    const originalUserPrompt = `Topic: Hydroponic Culinary Herb Growing
+Target Audience: Urban apartment dwellers with limited balcony space
+Industry: Urban Agriculture & Indoor Gardening
+Market: United States & Canada
+Primary Keyword: hydroponic herb garden
+Search Intent: informational
+Tone: authoritative
+Language: English
+Target Word Count: 800 words
+Strategy JSON: {"titles":[{"text":"Complete Hydroponic Herb Guide","angle":"Comprehensive"}],"keywords":{"primary":"hydroponic herb garden","secondary":["indoor herbs"]}}
+Outline JSON: {"sections":[{"h2":"Essential Lighting Requirements","h3":[]},{"h2":"Container Selection and Drainage","h3":[]},{"h2":"Watering and Care Guidelines","h3":[]},{"h2":"Concluding Thoughts on Growing Herbs","h3":[]}]}`;
+
+    const mockProvider: LlmProvider = {
+      name: 'openai-compatible',
+      async generate(req: LlmRequest): Promise<LlmResult> {
+        if (!capturedRetryReq) {
+          // Attempt 1 returns under-target draft
+          return { text: initialUnderTargetDraft, usage: { inputTokens: 500, outputTokens: 320 } };
+        }
+        // Attempt 2: capturedRetryReq is set
+        return { text: correctedDraft, usage: { inputTokens: 900, outputTokens: 810 } };
+      }
+    };
+
+    // Spy on generate calls
+    const originalGenerate = mockProvider.generate.bind(mockProvider);
+    let callIndex = 0;
+    mockProvider.generate = async (req: LlmRequest, signal?: AbortSignal) => {
+      callIndex++;
+      if (callIndex === 2) {
+        capturedRetryReq = req;
+      }
+      return originalGenerate(req, signal);
+    };
+
+    const controller = new AbortController();
+    const result = await callProviderWithMarkdownValidation(
+      mockProvider,
+      {
+        system: 'You are an expert SEO content strategist and technical writer.',
+        user: originalUserPrompt,
+        maxTokens: 1800,
+        temperature: 0.7
+      },
+      'Complete Hydroponic Herb Guide',
+      'Article',
+      controller.signal,
+      800
+    );
+
+    expect(result.attempts).toBe(2);
+    expect(capturedRetryReq).not.toBeNull();
+
+    // 1. Verify original system prompt is preserved
+    expect(capturedRetryReq!.system).toBe('You are an expert SEO content strategist and technical writer.');
+
+    // 2. Verify complete original user instructions & context are retained
+    expect(capturedRetryReq!.user).toContain('Topic: Hydroponic Culinary Herb Growing');
+    expect(capturedRetryReq!.user).toContain('Target Audience: Urban apartment dwellers with limited balcony space');
+    expect(capturedRetryReq!.user).toContain('Industry: Urban Agriculture & Indoor Gardening');
+    expect(capturedRetryReq!.user).toContain('Market: United States & Canada');
+    expect(capturedRetryReq!.user).toContain('Primary Keyword: hydroponic herb garden');
+    expect(capturedRetryReq!.user).toContain('Search Intent: informational');
+    expect(capturedRetryReq!.user).toContain('Tone: authoritative');
+    expect(capturedRetryReq!.user).toContain('Language: English');
+    expect(capturedRetryReq!.user).toContain('Strategy JSON:');
+    expect(capturedRetryReq!.user).toContain('Outline JSON:');
+
+    // 3. Verify failure reason and word count ranges are included
+    expect(capturedRetryReq!.user).toContain('REVISION INSTRUCTIONS (PREVIOUS ATTEMPT FAILED VALIDATION)');
+    expect(capturedRetryReq!.user).toContain('is under target 800 words');
+    expect(capturedRetryReq!.user).toContain('strictly between 720 and 880 words');
+
+    // 4. Verify expansion guidance is provided
+    expect(capturedRetryReq!.user).toContain('ACTION REQUIRED: EXPAND CONTENT');
+    expect(capturedRetryReq!.user).toContain('Expand each section with actionable, in-depth explanations');
+
+    // 5. Verify previous draft is included for revision
+    expect(capturedRetryReq!.user).toContain('PREVIOUS DRAFT FOR REFERENCE & REVISION:');
+    expect(capturedRetryReq!.user).toContain('--- BEGIN PREVIOUS DRAFT ---');
+    expect(capturedRetryReq!.user).toContain('# Complete Hydroponic Herb Guide');
+    expect(capturedRetryReq!.user).toContain('--- END PREVIOUS DRAFT ---');
+
+    // 6. Verify constraints preservation instructions
+    expect(capturedRetryReq!.user).toContain('Must preserve the exact top-level H1: # Complete Hydroponic Herb Guide');
+    expect(capturedRetryReq!.user).toContain('Must preserve primary keyword placement');
+    expect(capturedRetryReq!.user).toContain('Must preserve all generated outline sections');
+    expect(capturedRetryReq!.user).toContain('Must strictly preserve the requested language, tone, search intent, target audience, and market');
+  });
+
+  it('retains complete original user context, failure reason, condensation guidance, and previous draft on over-target retry', async () => {
+    let capturedRetryReq: LlmRequest | null = null;
+    // Build an excessively long article (1800 words vs 800 target) that calibration cannot trim safely
+    const massiveArticle = buildMockArticleWithWords('Complete Hydroponic Herb Guide', 1800);
+    const correctedDraft = buildMockArticleWithWords('Complete Hydroponic Herb Guide', 800);
+
+    const originalUserPrompt = `Topic: Hydroponic Culinary Herb Growing
+Target Audience: Urban apartment dwellers
+Primary Keyword: hydroponic herb garden
+Tone: professional
+Language: English
+Strategy JSON: {"titles":[{"text":"Complete Hydroponic Herb Guide","angle":"Comprehensive"}]}`;
+
+    let callIndex = 0;
+    const mockProvider: LlmProvider = {
+      name: 'openai-compatible',
+      async generate(req: LlmRequest): Promise<LlmResult> {
+        callIndex++;
+        if (callIndex === 1) {
+          return { text: massiveArticle, usage: { inputTokens: 500, outputTokens: 1800 } };
+        }
+        capturedRetryReq = req;
+        return { text: correctedDraft, usage: { inputTokens: 1200, outputTokens: 800 } };
+      }
+    };
+
+    const controller = new AbortController();
+    const result = await callProviderWithMarkdownValidation(
+      mockProvider,
+      {
+        system: 'Expert content writer system prompt.',
+        user: originalUserPrompt,
+        maxTokens: 2500,
+        temperature: 0.7
+      },
+      'Complete Hydroponic Herb Guide',
+      'Article',
+      controller.signal,
+      800
+    );
+
+    expect(result.attempts).toBe(2);
+    expect(capturedRetryReq).not.toBeNull();
+
+    // 1. Verify original system prompt is preserved
+    expect(capturedRetryReq!.system).toBe('Expert content writer system prompt.');
+
+    // 2. Verify complete original user context is retained
+    expect(capturedRetryReq!.user).toContain('Topic: Hydroponic Culinary Herb Growing');
+    expect(capturedRetryReq!.user).toContain('Target Audience: Urban apartment dwellers');
+    expect(capturedRetryReq!.user).toContain('Primary Keyword: hydroponic herb garden');
+    expect(capturedRetryReq!.user).toContain('Strategy JSON:');
+
+    // 3. Verify failure reason and word count ranges
+    expect(capturedRetryReq!.user).toContain('REVISION INSTRUCTIONS (PREVIOUS ATTEMPT FAILED VALIDATION)');
+    expect(capturedRetryReq!.user).toContain('strictly between 720 and 880 words');
+
+    // 4. Verify condensation guidance is provided
+    expect(capturedRetryReq!.user).toContain('ACTION REQUIRED: CONDENSE CONTENT');
+    expect(capturedRetryReq!.user).toContain('Tighten sentences and eliminate redundant phrasing');
+
+    // 5. Verify previous draft is embedded
+    expect(capturedRetryReq!.user).toContain('PREVIOUS DRAFT FOR REFERENCE & REVISION:');
+    expect(capturedRetryReq!.user).toContain('--- BEGIN PREVIOUS DRAFT ---');
+    expect(capturedRetryReq!.user).toContain('--- END PREVIOUS DRAFT ---');
+
+    // 6. Verify constraints
+    expect(capturedRetryReq!.user).toContain('Must preserve the exact top-level H1: # Complete Hydroponic Herb Guide');
+  });
 });
