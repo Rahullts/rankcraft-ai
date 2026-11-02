@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { LlmProvider, LlmRequest, LlmResult } from './types.js';
 import { generateNaturalMetaDescription } from '../lib/metaGenerator.js';
-import { generateAdaptiveOutline, generateAdaptiveArticle } from '../lib/articleGenerator.js';
+import { generateAdaptiveOutline, generateAdaptiveArticle, detectTopicDomain, AdaptiveOutlineSection } from '../lib/articleGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,24 +43,18 @@ export class MockProvider implements LlmProvider {
       targetWordCount = parseInt(targetMatch[1], 10);
     }
 
-    const topicLower = topic.toLowerCase();
-    const kwLower = primaryKw.toLowerCase();
-
-    const isHerbDefault = (topicLower === 'growing herbs at home' || (topicLower.includes('herb') && kwLower.includes('herb'))) && !topicLower.includes('hydroponic');
-    const isHydroponic = topicLower.includes('hydroponic') || kwLower.includes('hydroponic');
-    const isDatabase = topicLower.includes('database') || kwLower.includes('database') || topicLower.includes('query');
-    const isBattery = topicLower.includes('battery') || kwLower.includes('battery') || topicLower.includes('electric vehicle');
+    const domain = detectTopicDomain(topic, primaryKw);
 
     // -------------------------------------------------------------------------
     // Stage 1: Strategy
     // -------------------------------------------------------------------------
     if (promptText.includes('produce the SEO strategy elements')) {
-      if (isHerbDefault) {
+      if (domain === 'herb') {
         const content = fs.readFileSync(path.join(FIXTURES_DIR, 'mockStrategy.json'), 'utf-8');
         return { text: content, usage: { inputTokens: 420, outputTokens: 260 } };
       }
 
-      if (isHydroponic) {
+      if (domain === 'hydroponic') {
         const hydroStrategy = {
           titles: [
             { text: "Indoor Hydroponic Gardening: A Guide for Beginners", angle: "guide" },
@@ -97,7 +91,7 @@ export class MockProvider implements LlmProvider {
         };
       }
 
-      if (isDatabase) {
+      if (domain === 'database') {
         const dbStrategy = {
           titles: [
             { text: "Database Performance: Complete Optimization Guide", angle: "guide" },
@@ -134,7 +128,7 @@ export class MockProvider implements LlmProvider {
         };
       }
 
-      if (isBattery) {
+      if (domain === 'battery') {
         const batteryStrategy = {
           titles: [
             { text: "Solid State Battery: The Future of Clean Transport", angle: "guide" },
@@ -169,32 +163,219 @@ export class MockProvider implements LlmProvider {
         };
       }
 
+      if (domain === 'cinema_ai') {
+        const cinemaAiStrategy = {
+          titles: [
+            { text: "AI in the Movie Industry: Transforming Modern Cinema", angle: "guide" },
+            { text: "How Artificial Intelligence Is Changing Movie Production", angle: "how-to" },
+            { text: "7 Ways AI in the Movie Industry Accelerates Filmmaking", angle: "list" },
+            { text: "Traditional Filmmaking vs AI: The Future of Production", angle: "comparison" },
+            { text: "Will AI in the Movie Industry Replace Human Creativity?", angle: "question" }
+          ],
+          metaDescription: generateNaturalMetaDescription(primaryKw || "AI in the movie industry", topic),
+          keywords: {
+            primary: primaryKw || "AI in the movie industry",
+            secondary: [
+              "generative cinema tools",
+              "virtual production VFX",
+              "neural rendering techniques",
+              "algorithmic script analysis",
+              "digital actor likeness rights",
+              "automated post-production editing"
+            ],
+            longTail: [
+              "how artificial intelligence is changing movie production",
+              "ethical considerations for ai in filmmaking",
+              "best generative ai tools for filmmakers",
+              "ai visual effects workflows in hollywood",
+              "future of artificial intelligence in cinema",
+              "protecting actor digital likenesses in movies"
+            ]
+          }
+        };
+
+        return {
+          text: JSON.stringify(cinemaAiStrategy, null, 2),
+          usage: { inputTokens: 420, outputTokens: 260 }
+        };
+      }
+
+      if (domain === 'cinema_lgbtq') {
+        const lgbtqStrategy = {
+          titles: [
+            { text: "LGBTQ+ Representation in Modern Cinema: Complete Guide", angle: "guide" },
+            { text: "How LGBTQ+ Representation in Modern Cinema Has Evolved", angle: "how-to" },
+            { text: "7 Groundbreaking Films in Modern Queer Cinema", angle: "list" },
+            { text: "Independent Queer Cinema vs Mainstream Studio Films", angle: "comparison" },
+            { text: "Why Does Authentic LGBTQ+ Casting Matter in Movies?", angle: "question" }
+          ],
+          metaDescription: generateNaturalMetaDescription(primaryKw || "LGBTQ+ representation in modern cinema", topic),
+          keywords: {
+            primary: primaryKw || "LGBTQ+ representation in modern cinema",
+            secondary: [
+              "authentic queer casting",
+              "intersectional queer narratives",
+              "independent lgbtq cinema",
+              "queer film festival acclaim",
+              "diverse cinematic storytelling",
+              "international film distribution challenges"
+            ],
+            longTail: [
+              "evolution of lgbtq representation in cinema",
+              "importance of authentic queer casting in movies",
+              "groundbreaking independent lgbtq films",
+              "how modern cinema portrays queer characters",
+              "diversity and inclusion behind the camera",
+              "navigating international censorship for queer films"
+            ]
+          }
+        };
+
+        return {
+          text: JSON.stringify(lgbtqStrategy, null, 2),
+          usage: { inputTokens: 420, outputTokens: 260 }
+        };
+      }
+
+      if (domain === 'education_ai') {
+        const eduStrategy = {
+          titles: [
+            { text: "AI in Education: Transforming Modern Classroom Learning", angle: "guide" },
+            { text: "How AI in Education Empowers Teachers and Students", angle: "how-to" },
+            { text: "7 Powerful Ways AI in Education Improves Student Outcomes", angle: "list" },
+            { text: "Traditional Instruction vs AI Adaptive Learning", angle: "comparison" },
+            { text: "Can AI in Education Bridge Classroom Learning Gaps?", angle: "question" }
+          ],
+          metaDescription: generateNaturalMetaDescription(primaryKw || "AI in education", topic),
+          keywords: {
+            primary: primaryKw || "AI in education",
+            secondary: [
+              "adaptive learning platforms",
+              "intelligent tutoring systems",
+              "automated grading workflows",
+              "student data privacy protections",
+              "multimodal accessibility aids",
+              "predictive learning analytics"
+            ],
+            longTail: [
+              "how artificial intelligence is transforming classroom learning",
+              "benefits of adaptive learning systems for students",
+              "ethical considerations for ai in education",
+              "ai grading tools for teachers",
+              "personalized learning pathways using artificial intelligence",
+              "protecting student data privacy in digital education"
+            ]
+          }
+        };
+
+        return {
+          text: JSON.stringify(eduStrategy, null, 2),
+          usage: { inputTokens: 420, outputTokens: 260 }
+        };
+      }
+
+      if (domain === 'cybersecurity') {
+        const cyberStrategy = {
+          titles: [
+            { text: "Cybersecurity in Everyday Life: Practical Defense Guide", angle: "guide" },
+            { text: "How to Practice Cybersecurity in Everyday Life at Home", angle: "how-to" },
+            { text: "7 Essential Habits for Cybersecurity in Everyday Life", angle: "list" },
+            { text: "Passwords vs Passkeys: Which Security Method Is Safer?", angle: "comparison" },
+            { text: "Is Multi-Factor Authentication Enough for Full Security?", angle: "question" }
+          ],
+          metaDescription: generateNaturalMetaDescription(primaryKw || "cybersecurity in everyday life", topic),
+          keywords: {
+            primary: primaryKw || "cybersecurity in everyday life",
+            secondary: [
+              "multi-factor authentication",
+              "password manager best practices",
+              "home wifi router security",
+              "phishing attack prevention",
+              "credit report security freeze",
+              "device automated data backup"
+            ],
+            longTail: [
+              "how to protect personal data from online scams",
+              "best cybersecurity practices for everyday life",
+              "securing smart home devices from hackers",
+              "importance of multi-factor authentication today",
+              "recognizing modern phishing emails and texts",
+              "safeguarding digital identity and financial accounts"
+            ]
+          }
+        };
+
+        return {
+          text: JSON.stringify(cyberStrategy, null, 2),
+          usage: { inputTokens: 420, outputTokens: 260 }
+        };
+      }
+
+      if (domain === 'climate_sustainability') {
+        const climateStrategy = {
+          titles: [
+            { text: "Climate Change and Sustainable Living: Actionable Guide", angle: "guide" },
+            { text: "How Sustainable Living Helps Mitigate Climate Change", angle: "how-to" },
+            { text: "7 Practical Steps for Climate Change and Sustainable Living", angle: "list" },
+            { text: "Individual Sustainable Living vs Corporate Climate Action", angle: "comparison" },
+            { text: "Can Households Transition to Sustainable Living on a Budget?", angle: "question" }
+          ],
+          metaDescription: generateNaturalMetaDescription(primaryKw || "sustainable living", topic),
+          keywords: {
+            primary: primaryKw || "sustainable living",
+            secondary: [
+              "household carbon footprint",
+              "residential energy efficiency",
+              "zero-waste food planning",
+              "sustainable mobility choices",
+              "community solar programs",
+              "circular economy initiatives"
+            ],
+            longTail: [
+              "how to live sustainably and reduce climate impact",
+              "practical ways to lower household carbon emissions",
+              "transitioning to renewable energy at home",
+              "zero waste strategies for daily life",
+              "community actions for environmental conservation",
+              "cost effective home electrification methods"
+            ]
+          }
+        };
+
+        return {
+          text: JSON.stringify(climateStrategy, null, 2),
+          usage: { inputTokens: 420, outputTokens: 260 }
+        };
+      }
+
       // Adaptive Natural Strategy for any other topic
       const meta = generateNaturalMetaDescription(primaryKw, topic);
       const dynamicStrategy = {
         titles: [
           { text: `${primaryKw}: Essential Guide for Beginners`, angle: "guide" },
           { text: `How to Get Started with ${primaryKw} Today`, angle: "how-to" },
-          { text: `5 Practical Steps for Better ${primaryKw}`, angle: "list" },
-          { text: `${primaryKw} vs Traditional Methods: Review`, angle: "comparison" },
+          { text: `7 Practical Strategies for Better ${primaryKw}`, angle: "list" },
+          { text: `${primaryKw} vs Conventional Methods: Review`, angle: "comparison" },
           { text: `Can You Implement ${primaryKw} on a Budget?`, angle: "question" }
         ],
         metaDescription: meta,
         keywords: {
           primary: primaryKw,
           secondary: [
-            `${primaryKw} equipment`,
             `${primaryKw} best practices`,
-            `${primaryKw} setup guide`,
-            `${primaryKw} practical tips`,
-            `${primaryKw} essentials`
+            `${primaryKw} implementation`,
+            `${primaryKw} core principles`,
+            `${primaryKw} methodology`,
+            `${primaryKw} optimization`,
+            `${primaryKw} strategic frameworks`
           ],
           longTail: [
             `how to get started with ${primaryKw}`,
-            `best tools for ${primaryKw} beginners`,
+            `best practices for ${primaryKw} implementation`,
             `step by step guide to ${primaryKw}`,
             `common mistakes to avoid in ${primaryKw}`,
-            `practical tips for ${primaryKw} success`
+            `practical strategies for ${primaryKw} success`,
+            `measuring outcomes and progress in ${primaryKw}`
           ]
         }
       };
@@ -227,9 +408,36 @@ export class MockProvider implements LlmProvider {
     // -------------------------------------------------------------------------
     if (promptText.includes('write the full article in Markdown')) {
       let expectedH1 = '';
-      const h1Match = promptText.match(/"text":\s*"([^"]+)"/);
+      const h1Match = promptText.match(/"text":\s*"([^"]+)"/) || promptText.match(/#\s+([^\n]+)/);
       if (h1Match) {
         expectedH1 = h1Match[1];
+      }
+
+      // Extract outlineSections if present in <outline> tag
+      let outlineSections: AdaptiveOutlineSection[] | undefined;
+      const outlineMatch = promptText.match(/<outline>([\s\S]*?)<\/outline>/);
+      if (outlineMatch) {
+        try {
+          const parsed = JSON.parse(outlineMatch[1]);
+          if (parsed && Array.isArray(parsed.sections)) {
+            outlineSections = parsed.sections;
+          }
+        } catch {
+          // fallback to adaptive outline generator
+        }
+      }
+
+      // Check if this is a retry revision
+      const isRetry = promptText.includes('REVISION INSTRUCTIONS') || promptText.includes('ACTION REQUIRED:');
+      if (isRetry) {
+        const retryTargetMatch = promptText.match(/Requested target:\s*(\d+)/i) || promptText.match(/target of\s*(\d+)/i);
+        if (retryTargetMatch) {
+          targetWordCount = parseInt(retryTargetMatch[1], 10);
+        }
+        const preserveH1Match = promptText.match(/Must preserve the exact top-level H1:\s*#\s*([^\n]+)/i);
+        if (preserveH1Match) {
+          expectedH1 = preserveH1Match[1].trim();
+        }
       }
 
       const articleText = generateAdaptiveArticle({
@@ -237,7 +445,8 @@ export class MockProvider implements LlmProvider {
         primaryKeyword: primaryKw,
         audience,
         targetWords: targetWordCount,
-        expectedH1: expectedH1 ? `# ${expectedH1}` : undefined
+        expectedH1: expectedH1 ? (expectedH1.startsWith('# ') ? expectedH1 : `# ${expectedH1}`) : undefined,
+        outlineSections
       });
 
       return {
@@ -250,12 +459,12 @@ export class MockProvider implements LlmProvider {
     // Stage 4: FAQs
     // -------------------------------------------------------------------------
     if (promptText.includes('write 5 FAQs a reader of this article might ask')) {
-      if (isHerbDefault) {
+      if (domain === 'herb') {
         const content = fs.readFileSync(path.join(FIXTURES_DIR, 'mockFaqs.json'), 'utf-8');
         return { text: content, usage: { inputTokens: 520, outputTokens: 340 } };
       }
 
-      if (isHydroponic) {
+      if (domain === 'hydroponic') {
         const hydroFaqs = {
           faqs: [
             {
@@ -287,7 +496,7 @@ export class MockProvider implements LlmProvider {
         };
       }
 
-      if (isBattery) {
+      if (domain === 'battery') {
         const batteryFaqs = {
           faqs: [
             {
@@ -319,7 +528,7 @@ export class MockProvider implements LlmProvider {
         };
       }
 
-      if (isDatabase) {
+      if (domain === 'database') {
         const dbFaqs = {
           faqs: [
             {
@@ -351,28 +560,188 @@ export class MockProvider implements LlmProvider {
         };
       }
 
+      if (domain === 'cinema_ai') {
+        const cinemaAiFaqs = {
+          faqs: [
+            {
+              question: "How is artificial intelligence being used in modern movie production?",
+              answer: "Filmmakers use artificial intelligence across pre-production, principal photography, and post-production. Machine learning algorithms assist in generating early storyboards, simulating realistic visual effects, automating color grading, and cleaning background audio. These tools accelerate repetitive technical tasks while allowing creative directors to focus on storytelling."
+            },
+            {
+              question: "Will artificial intelligence replace human actors and screenwriters in cinema?",
+              answer: "Industry consensus emphasizes that artificial intelligence serves as a collaborative tool rather than a replacement for human artistry. While neural networks can generate dialogue prompts or background digital extras, authentic emotional resonance, nuanced character journeys, and cultural depth require genuine human perspective and lived experiences."
+            },
+            {
+              question: "What ethical concerns surround digital likenesses and voice cloning in film?",
+              answer: "Major ethical debates center on intellectual property ownership, informed consent, and compensation for performers. Film unions and studios are actively negotiating contractual protections to prevent unauthorized synthetic reproductions of actor likenesses or vocal performances without clear authorization and fair remuneration."
+            },
+            {
+              question: "How does artificial intelligence impact visual effects budgets and timelines?",
+              answer: "Neural rendering and automated motion tracking significantly shorten post-production schedules. Tasks that previously required weeks of manual rotoscoping can now be completed in hours. This efficiency lowers VFX barriers for independent filmmakers while allowing major studios to create complex visual spectacles more cost-effectively."
+            },
+            {
+              question: "What skills should upcoming filmmakers learn to adapt to AI technologies?",
+              answer: "Aspiring filmmakers should balance traditional cinematic fundamentals with fluency in emerging digital tools. Understanding narrative pacing, cinematography, and dramatic performance remains vital, alongside practical familiarity with virtual production engines, algorithmic editing suites, and prompt-driven pre-visualization platforms. Embracing ongoing technical education ensures creators remain competitive while preserving their personal creative vision across rapidly evolving production environments."
+            }
+          ]
+        };
+
+        return {
+          text: JSON.stringify(cinemaAiFaqs, null, 2),
+          usage: { inputTokens: 520, outputTokens: 340 }
+        };
+      }
+
+      if (domain === 'cinema_lgbtq') {
+        const lgbtqFaqs = {
+          faqs: [
+            {
+              question: "Why is authentic representation important in modern cinema?",
+              answer: "Authentic representation validates diverse lived experiences and fosters broader cultural empathy among global audiences. When cinema portrays multifaceted LGBTQ+ characters with emotional depth rather than relying on tired caricatures or tragic tropes, it enriches the storytelling landscape and reflects the genuine diversity of modern society."
+            },
+            {
+              question: "How has LGBTQ+ cinema evolved from early independent films to mainstream releases?",
+              answer: "Early LGBTQ+ cinematic narratives were largely confined to underground independent circuits due to commercial censorship and restrictive studio codes. Over recent decades, sustained advocacy and critical acclaim have propelled queer stories into mainstream multiplexes and major streaming platforms, earning prestigious awards and global box-office success."
+            },
+            {
+              question: "What role does authentic casting play in contemporary film production?",
+              answer: "Casting actors whose identities align with their characters brings invaluable nuance, cultural understanding, and emotional authenticity to complex roles. It also addresses systemic industry disparities by providing equitable professional opportunities for underrepresented performers who have historically faced marginalization within mainstream studio casting systems."
+            },
+            {
+              question: "What challenges do queer filmmakers face in international film distribution?",
+              answer: "Filmmakers often encounter regulatory hurdles, censorship mandates, and restrictive age ratings in conservative overseas territories. Navigating these regional distribution barriers requires strategic partnerships with international sales agents, community film festivals, and digital streaming outlets that protect narrative integrity while reaching supportive global audiences."
+            },
+            {
+              question: "How can independent film festivals support emerging LGBTQ+ cinematic voices?",
+              answer: "Independent film festivals provide crucial exhibition platforms, networking pipelines, and distribution avenues for visionary queer creators. By highlighting innovative scripts and facilitating connections with established producers and distributors, these festivals nurture emerging storytellers and champion narratives that push creative and cultural boundaries."
+            }
+          ]
+        };
+
+        return {
+          text: JSON.stringify(lgbtqFaqs, null, 2),
+          usage: { inputTokens: 520, outputTokens: 340 }
+        };
+      }
+
+      if (domain === 'education_ai') {
+        const eduFaqs = {
+          faqs: [
+            {
+              question: "How does artificial intelligence personalize learning for individual students?",
+              answer: "Artificial intelligence systems analyze student interaction patterns, assessment scores, and pacing in real time. By identifying conceptual misunderstandings immediately, adaptive learning platforms deliver customized practice exercises and targeted remedial explanations tailored to each learner's unique strengths, challenges, and cognitive learning preferences."
+            },
+            {
+              question: "What role do educators play in an AI-enhanced classroom environment?",
+              answer: "Educators remain the irreplaceable foundation of effective education. Rather than replacing teachers, artificial intelligence automates routine administrative responsibilities like grading and attendance logging, freeing valuable classroom hours so instructors can deliver individualized student mentorship, foster critical discussions, and provide compassionate emotional guidance."
+            },
+            {
+              question: "How does educational technology protect student data privacy and security?",
+              answer: "Schools and technology vendors must enforce stringent data governance protocols, including end-to-end encryption, strict access controls, and compliance with privacy regulations. Responsible platforms minimize sensitive data collection, prohibit behavioral advertising, and ensure that student educational records remain secure and confidential at all times."
+            },
+            {
+              question: "Can artificial intelligence help identify students who need early academic support?",
+              answer: "Yes, predictive analytics can evaluate continuous learning engagement metrics to detect struggling students weeks before formal midterm evaluations take place. This early alert capability enables teachers and academic counselors to organize proactive pedagogical interventions, preventing students from falling behind in challenging subject curricula."
+            },
+            {
+              question: "What are the primary challenges in deploying AI tools across diverse schools?",
+              answer: "Key challenges include bridging digital divide disparities, securing reliable internet connectivity, providing comprehensive teacher training, and preventing algorithmic training biases. Ensuring equitable technology distribution ensures that all students, regardless of socioeconomic background or geographic location, benefit from modern digital educational innovations while receiving high-quality pedagogical support."
+            }
+          ]
+        };
+
+        return {
+          text: JSON.stringify(eduFaqs, null, 2),
+          usage: { inputTokens: 520, outputTokens: 340 }
+        };
+      }
+
+      if (domain === 'cybersecurity') {
+        const cyberFaqs = {
+          faqs: [
+            {
+              question: "What are the most essential cybersecurity practices for everyday computer users?",
+              answer: "The most effective cybersecurity habits include enabling multi-factor authentication on every account, using a dedicated password manager to create unique complex passphrases, maintaining automatic operating system updates, and exercising vigilant caution before clicking on unsolicited email links, unfamiliar downloads, or suspicious text attachments."
+            },
+            {
+              question: "Why is multi-factor authentication so crucial for personal online accounts?",
+              answer: "Multi-factor authentication adds an indispensable extra verification layer beyond a simple password. Even if malicious actors acquire your login credentials through a third-party data breach, they cannot access your account without the secondary biometric prompt, security key, or temporary authentication token generated on your device."
+            },
+            {
+              question: "How can individuals protect their home Wi-Fi networks from unauthorized intrusion?",
+              answer: "Homeowners should immediately change default router administrator passwords, enable strong WPA3 wireless encryption, and disable remote administrative access. Creating an isolated guest Wi-Fi network specifically for smart home appliances and IoT devices prevents compromised gadgets from exposing personal computers and sensitive data."
+            },
+            {
+              question: "How do modern phishing attacks deceive users and how can they be recognized?",
+              answer: "Phishing attacks use deceptive branding, psychological urgency, and spoofed sender addresses to manipulate victims into revealing confidential information. Users can identify phishing schemes by scrutinizing email header domains, verifying unusual financial requests through independent channels, and avoiding urgent prompts demanding immediate credential entry."
+            },
+            {
+              question: "What steps should someone take immediately if they suspect a security breach?",
+              answer: "If you suspect an account compromise, disconnect affected devices from the internet immediately. Reset all critical account passwords starting with your primary email, revoke active login sessions, enable multi-factor authentication, monitor banking statements for fraudulent charges, and report the breach to relevant platform security teams."
+            }
+          ]
+        };
+
+        return {
+          text: JSON.stringify(cyberFaqs, null, 2),
+          usage: { inputTokens: 520, outputTokens: 340 }
+        };
+      }
+
+      if (domain === 'climate_sustainability') {
+        const climateFaqs = {
+          faqs: [
+            {
+              question: "What are the most effective household actions to reduce climate impact?",
+              answer: "The highest-impact residential changes include improving home thermal insulation, switching to electric heat pump heating, transitioning to clean renewable electricity providers, and reducing private vehicle mileage through public transit or cycling. Additionally, minimizing household food waste and adopting plant-forward diets deliver substantial immediate environmental benefits."
+            },
+            {
+              question: "How does reducing household food waste help mitigate global climate change?",
+              answer: "Food waste decomposing in municipal landfills generates significant quantities of potent methane gas. By planning weekly meals deliberately, storing fresh produce correctly, and composting organic scraps, households prevent methane emissions while conserving the vast water, land, and energy resources required for commercial agriculture."
+            },
+            {
+              question: "Is transitioning to renewable energy affordable for ordinary homeowners and renters?",
+              answer: "Yes, renewable adoption is increasingly accessible through community solar programs, municipal clean energy aggregations, and regional utility green tariffs that require zero upfront equipment purchase. Homeowners can also leverage government tax credits and energy efficiency rebates that significantly reduce the initial cost of solar panel installations."
+            },
+            {
+              question: "How can sustainable daily transportation choices lower individual carbon footprints?",
+              answer: "Transportation represents one of the largest single components of personal emissions. Choosing active commuting like walking or biking for short trips, carpooling, utilizing electrified public transit, and transitioning to electric vehicles dramatically decreases fossil fuel consumption and improves localized urban air quality for surrounding communities."
+            },
+            {
+              question: "Why is individual sustainable living important when corporate emissions are so high?",
+              answer: "Individual consumer choices shape market demand, encouraging corporations to accelerate decarbonization across consumer supply chains. Moreover, grassroots adoption of sustainable habits builds widespread cultural momentum that empowers civic leaders to enact bolder municipal clean energy policies, infrastructure upgrades, and environmental regulations."
+            }
+          ]
+        };
+
+        return {
+          text: JSON.stringify(climateFaqs, null, 2),
+          usage: { inputTokens: 520, outputTokens: 340 }
+        };
+      }
+
       // Adaptive Natural FAQs for any other topic (strictly 40-70 words per answer)
       const dynamicFaqs = {
         faqs: [
           {
             question: `What is the most effective way to begin with ${primaryKw}?`,
-            answer: `The most effective approach is to start with a focused, manageable routine rather than attempting complex advanced methods right away. Master the fundamental techniques first, observe your initial outcomes carefully, and gradually expand your workflow as your personal confidence and practical familiarity develop over time.`
+            answer: `The most effective way is to begin with the core foundational concepts before exploring advanced methodologies. Building a clear understanding of fundamental principles allows you to evaluate strategies objectively, avoid common trial-and-error setbacks, and develop a reliable framework that adapts to your evolving operational requirements over time.`
           },
           {
-            question: `What essential equipment is needed to get started?`,
-            answer: `You only need a few reliable, high-quality basic tools suited to your immediate workspace and practical goals. Starting with straightforward, proven equipment keeps your initial process simple, eliminates unnecessary technical confusion, and allows you to understand core operating principles thoroughly before investing in specialized upgrades.`
+            question: `What are the most critical factors for successful implementation?`,
+            answer: `Successful implementation depends on clear baseline planning, consistent execution of proven methodologies, and disciplined progress tracking. Prioritizing structured workflows and avoiding premature complexity ensures that your team or individual efforts achieve predictable, high-quality outcomes while maintaining long-term focus on primary strategic objectives.`
           },
           {
-            question: `How much time does routine maintenance require?`,
-            answer: `Routine maintenance typically requires only ten to fifteen minutes each day once your initial configuration is established. Maintaining consistent, brief daily check-ins is far more effective than sporadic weekend overhauls and helps you identify minor adjustments before small inconsistencies impact your overall workflow.`
+            question: `What common misconceptions or pitfalls should practitioners avoid?`,
+            answer: `The most frequent mistake is attempting advanced tactics before establishing solid core competencies. Neglecting foundational preparation often leads to inconsistent outcomes and unnecessary frustration. Focus instead on mastering essential principles, documenting your observations carefully, and making gradual, evidence-based adjustments as your practical experience expands.`
           },
           {
-            question: `What are the most common mistakes beginners make?`,
-            answer: `The most common mistake is rushing into complicated configurations before mastering basic principles and establishing regular habits. Skipping initial preparation often leads to inconsistent outcomes, so prioritize steady daily practice, keep detailed notes on your results, and refine your approach based on observed evidence.`
+            question: `How should progress and strategic outcomes be measured effectively?`,
+            answer: `Measure progress by tracking meaningful qualitative and quantitative benchmarks aligned with your long-term goals. Establishing consistent review intervals helps you identify trends early, validate whether specific techniques are delivering expected value, and make timely adjustments before minor inefficiencies turn into substantial operational obstacles.`
           },
           {
-            question: `How should progress and overall results be evaluated?`,
-            answer: `Evaluate your ongoing progress by tracking steady, incremental improvements in your daily routine and verifiable outcomes. Keeping a brief written log of your observations helps you understand what methods work best in your specific environment, enabling continuous, data-driven optimization over extended periods.`
+            question: `How can practitioners stay informed about future developments in this field?`,
+            answer: `Staying informed requires engaging regularly with authoritative industry research, participating in peer discussions, and observing real-world case studies. Continuous learning ensures that your knowledge base remains current, enabling you to incorporate emerging best practices and adapt proactively as broader technological and market landscapes evolve.`
           }
         ]
       };
@@ -386,12 +755,12 @@ export class MockProvider implements LlmProvider {
     // -------------------------------------------------------------------------
     // Mode A: Simple Prompt Baseline
     // -------------------------------------------------------------------------
-    if (isHerbDefault) {
+    if (domain === 'herb') {
       const simple = fs.readFileSync(path.join(FIXTURES_DIR, 'mockSimple.md'), 'utf-8');
       return { text: simple, usage: { inputTokens: 120, outputTokens: 95 } };
     }
 
-    if (isHydroponic) {
+    if (domain === 'hydroponic') {
       const simpleHydro = `# An Introduction to Sustainable Indoor Hydroponic Gardening
 
 Indoor hydroponic gardening is a popular method for urban homeowners to grow plants inside without soil. It uses water and mineral nutrients instead of garden dirt.
@@ -406,7 +775,7 @@ In summary, indoor hydroponic gardening is a good way to have fresh greens at ho
       };
     }
 
-    if (isDatabase) {
+    if (domain === 'database') {
       const simpleDb = `# An Introduction to Cloud Database Performance Optimization
 
 Database performance is an important subject for backend developers and cloud engineers. When applications get more traffic, queries can become slow.

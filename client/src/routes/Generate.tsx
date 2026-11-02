@@ -57,6 +57,7 @@ export const Generate: React.FC = () => {
     else if (input.market.length < 2 || input.market.length > 80) errors.market = 'Market must be 2-80 characters';
 
     if (!input.primaryKeyword.trim()) errors.primaryKeyword = 'Primary keyword is required';
+    else if (input.primaryKeyword.includes(',')) errors.primaryKeyword = 'Please enter only one primary keyword (do not separate multiple keywords with commas)';
     else if (input.primaryKeyword.length < 2 || input.primaryKeyword.length > 60) errors.primaryKeyword = 'Keyword must be 2-60 characters';
     else if (input.primaryKeyword.trim().split(/\s+/).length > 6) errors.primaryKeyword = 'Keyword must be at most 6 words';
 
@@ -169,6 +170,9 @@ export const Generate: React.FC = () => {
                   onChange={(e) => setInput({ primaryKeyword: e.target.value })}
                   disabled={state.pipelineRunning}
                 />
+                <span className="form-hint" style={{ fontSize: '0.75rem', color: '#6B7280', display: 'block', marginTop: '4px' }}>
+                  Enter only one primary keyword or keyphrase. Secondary keywords are generated automatically.
+                </span>
                 {clientErrors.primaryKeyword && <span className="error-text">{clientErrors.primaryKeyword}</span>}
               </div>
             </div>

@@ -58,6 +58,10 @@ export const seoInputSchema = z.object({
         .min(2, 'Primary keyword must be at least 2 characters')
         .max(60, 'Primary keyword must be at most 60 characters')
         .refine(
+          (val) => !val.includes(','),
+          'Primary keyword must be a single keyword or keyphrase (do not enter comma-separated lists)'
+        )
+        .refine(
           (val) => val.split(' ').filter(Boolean).length <= 6,
           'Primary keyword must be at most 6 words'
         )

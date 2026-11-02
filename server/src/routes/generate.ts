@@ -13,6 +13,28 @@ import { validateAndRepairMetaDescription, checkAndRepairMetaDescription } from 
 
 export const generateRouter = Router();
 
+function formatZodErrors(error: z.ZodError): string {
+  const messages: string[] = [];
+  for (const issue of error.issues) {
+    if (issue.code === 'invalid_union' && (issue as any).unionErrors) {
+      const branchErrors = (issue as any).unionErrors as z.ZodError[];
+      // Filter out branch errors that just say { input: Required } when the user passed a top-level payload
+      const nonInputRequired = branchErrors.filter(
+        (b) => !b.issues.every((i) => i.path[0] === 'input' && (i.message === 'Required' || (i as any).received === 'undefined'))
+      );
+      const candidates = nonInputRequired.length > 0 ? nonInputRequired : branchErrors;
+      const bestBranch = candidates[candidates.length - 1] || candidates[0];
+      if (bestBranch) {
+        messages.push(formatZodErrors(bestBranch));
+        continue;
+      }
+    }
+    const path = issue.path.join('.');
+    messages.push(path ? `${path}: ${issue.message}` : issue.message);
+  }
+  return messages.join(', ');
+}
+
 // --------------------------------------------------------------------------
 // POST /api/strategy
 // --------------------------------------------------------------------------
@@ -26,11 +48,7 @@ generateRouter.post('/strategy', async (req: Request, res: Response, next) => {
   try {
     const parseRes = strategyReqSchema.safeParse(req.body);
     if (!parseRes.success) {
-      throw new AppError(
-        'VALIDATION_ERROR',
-        parseRes.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', '),
-        400
-      );
+      throw new AppError('VALIDATION_ERROR', formatZodErrors(parseRes.error), 400);
     }
 
     const { input } = parseRes.data;
@@ -119,11 +137,7 @@ generateRouter.post('/outline', async (req: Request, res: Response, next) => {
   try {
     const parseRes = outlineReqSchema.safeParse(req.body);
     if (!parseRes.success) {
-      throw new AppError(
-        'VALIDATION_ERROR',
-        parseRes.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', '),
-        400
-      );
+      throw new AppError('VALIDATION_ERROR', formatZodErrors(parseRes.error), 400);
     }
 
     const { input, strategy } = parseRes.data;
@@ -205,11 +219,7 @@ generateRouter.post('/article', async (req: Request, res: Response, next) => {
   try {
     const parseRes = articleReqSchema.safeParse(req.body);
     if (!parseRes.success) {
-      throw new AppError(
-        'VALIDATION_ERROR',
-        parseRes.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', '),
-        400
-      );
+      throw new AppError('VALIDATION_ERROR', formatZodErrors(parseRes.error), 400);
     }
 
     const { input, strategy, outline } = parseRes.data;
@@ -272,9 +282,9 @@ generateRouter.post('/article', async (req: Request, res: Response, next) => {
       usage: callRes.usage
     };
 
-    const response: ApiResponse<{ articleMarkdown: string }> = {
+    const response: ApiResponse<{ articleMarkdown: string; article: string }> = {
       ok: true,
-      data: { articleMarkdown: callRes.text },
+      data: { articleMarkdown: callRes.text, article: callRes.text },
       meta
     };
 
@@ -298,11 +308,7 @@ generateRouter.post('/faqs', async (req: Request, res: Response, next) => {
   try {
     const parseRes = faqsReqSchema.safeParse(req.body);
     if (!parseRes.success) {
-      throw new AppError(
-        'VALIDATION_ERROR',
-        parseRes.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', '),
-        400
-      );
+      throw new AppError('VALIDATION_ERROR', formatZodErrors(parseRes.error), 400);
     }
 
     const { input, strategy, outline } = parseRes.data;
